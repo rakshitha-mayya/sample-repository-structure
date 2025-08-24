@@ -1,0 +1,49 @@
+name: Build-Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Image-build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v3
+
+    - name: Build and push Docker image
+      run: |
+        docker build -f dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/nodejs-app:latest .
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: 'rakshithamayya/nodejs-app:latest'
+        output: trivy-report.json
+        format: json
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+      continue-on-error: true
+
+    - name: Upload Vulnerability Scan Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-report
+        path: trivy-report.json
+        retention-days: 30
+    
+    - name: Build and push Docker image
+      run: |
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodejs-app:latest 
+
+  Deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: deploy
+      run: |
+        kubectl apply -f application.yaml -n argocd
