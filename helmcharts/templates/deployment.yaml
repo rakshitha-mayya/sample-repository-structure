@@ -36,4 +36,3 @@ spec:
               port: 3000
             initialDelaySeconds: 15
             periodSeconds: 20
-          terminationGracePeriodSeconds: 30
