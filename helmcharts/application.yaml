@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/rakshitha-mayya/sample-repository-structure.git
-    path: charts
+    path: helmcharts
     targetRevision: main
     helm:
       valueFiles:
