@@ -1,7 +1,8 @@
+name: nodejs-app
 replicaCount: 1
 image:
-  repository: nginx
-  tag: stable
+  repository: node-k8s-app
+  tag: latest
 service:
-  type: ClusterIP
-  port: 80
+  type: NodePort
+  port: 3000

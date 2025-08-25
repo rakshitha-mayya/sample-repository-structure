@@ -3,7 +3,7 @@ name: Build-Deployment
 on:
   push:
     branches:
-      - main
+      - main-old
 
 jobs:
   Image-build-and-push:
@@ -38,7 +38,7 @@ jobs:
     
     - name: Build and push Docker image
       run: |
-        cd $PWD/node-k8s-app
+        cd $PWD/application/node-k8s-app
         docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:latest .
         echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:latest

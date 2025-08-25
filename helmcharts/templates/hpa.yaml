@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: nginx-app-nginx
+  name: {{ .Values.name }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: nginx-app-nginx
+    name: {{ .Values.name }}
   minReplicas: 1
   maxReplicas: 5
   metrics:
@@ -15,4 +15,4 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 1
+        averageUtilization: 50

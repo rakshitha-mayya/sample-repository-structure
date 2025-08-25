@@ -1,4 +1,4 @@
 apiVersion: v2
-name: my-nginx-chart
-description: A simple NGINX Helm chart
+name: nodejs-app
+description: A simple Node.js Helm chart
 version: 0.1.0

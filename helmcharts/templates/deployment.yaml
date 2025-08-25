@@ -1,26 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-nginx
+  name: {{ .Values.name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-nginx
+      app: {{ .Values.name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-nginx
+        app: {{ .Values.name }}
     spec:
       containers:
-        - name: nginx
+        - name: {{ .Values.name}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
-            - containerPort: 80
+            - containerPort: 3000
           resources:
             limits:
-              cpu: 50m
-              memory: 50Mi
+              cpu: 100m
+              memory: 100Mi
             requests:
-              cpu: 50m
-              memory: 50Mi
+              cpu: 100m
+              memory: 100Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          terminationGracePeriodSeconds: 30
