@@ -1,0 +1,17 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Values.name }}-scaledobject
+  namespace: test
+spec:
+  scaleTargetRef:
+    name: {{ .Values.name }}
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.prometheus.svc.cluster.local
+        metricName: http_requests_total
+        threshold: '1'
+        query: sum(rate(http_requests_total[1m]))
