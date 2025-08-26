@@ -1,12 +1,27 @@
-const http = require('http');
- 
-const PORT = process.env.PORT || 3000;
- 
-const server = http.createServer((req, res) => {
-  res.end('Hello from Node.js running in a Kubernetes Pod!');
+const express = require('express');
+const client = require('prom-client');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Create a custom metric
+const requestCount = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests'
 });
- 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+
+app.get('/', (req, res) => {
+  requestCount.inc();
+  res.send('Hello from Node.js running in a Kubernetes Pod!');
+});
+
+// Metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});
+
+app.listen(port, () => {
+  console.log(`App running on http://localhost:${port}`);
 });
  

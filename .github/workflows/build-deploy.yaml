@@ -3,7 +3,7 @@ name: Build-Deployment
 on:
   push:
     branches:
-      - main-old
+      - main
 
 jobs:
   Image-build-and-push:
@@ -38,10 +38,11 @@ jobs:
     
     - name: Build and push Docker image
       run: |
+        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
         cd $PWD/application/node-k8s-app
-        docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:latest .
+        docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
         echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
 
   # Deploy:
   #   runs-on: self-hosted
