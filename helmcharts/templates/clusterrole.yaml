@@ -6,6 +6,6 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments/scale", "replicasets/scale"]
     verbs: ["get", "update"]
- - apiGroups: [""]
+  - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list"]
