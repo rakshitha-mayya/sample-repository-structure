@@ -14,4 +14,4 @@ spec:
         serverAddress: http://prometheus-server.prometheus.svc.cluster.local
         metricName: http_requests_total
         threshold: '1'
-        query: sum(rate(http_requests_total[1m]))
+        query: sum(rate(http_requests_total[5m]))
