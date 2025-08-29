@@ -36,15 +36,30 @@ jobs:
     #     path: trivy-report.json
     #     retention-days: 30
     
-    - name: Build and push Docker image
-      run: |
-        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
-        echo ${CURRENT_TAG}
-        cd $PWD/application/node-k8s-app
-        docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
-        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
-        echo "${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} is pushed"
+    # - name: Build and push Docker image
+    #   run: |
+    #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+    #     echo ${CURRENT_TAG}
+    #     cd $PWD/application/node-k8s-app
+    #     docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
+    #     echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+    #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
+    #     echo "${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} is pushed"
+
+  kubeconform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install kubeconform
+        run: |
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate manifests
+        run: |
+          kubeconform -strict -summary -output json $(find . -name '*.yaml')
 
   # Deploy:
   #   runs-on: self-hosted
