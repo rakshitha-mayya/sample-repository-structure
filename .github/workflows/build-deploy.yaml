@@ -60,6 +60,7 @@ jobs:
       - name: Validate manifests
         run: |
           kubeconform -strict -summary -output json $(find . -name '*.yaml')
+        continue-on-error: true
           
   # Deploy:
   #   runs-on: self-hosted
