@@ -10,12 +10,12 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.name }}
-      name: nodejs
-      owner: devops-team
   template:
     metadata:
       labels:
         app: {{ .Values.name }}
+        name: nodejs
+        owner: devops-team
     spec:
       serviceAccountName: {{ .Values.name }}-sa
       containers:
