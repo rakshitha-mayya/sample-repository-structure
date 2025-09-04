@@ -2,11 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name }}
+  labels:
+    name: nodejs
+    owner: devops-team
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Values.name }}
+      name: nodejs
+      owner: devops-team
   template:
     metadata:
       labels:
