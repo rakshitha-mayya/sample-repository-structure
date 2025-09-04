@@ -12,6 +12,22 @@ jobs:
     - name: Check out the repo
       uses: actions/checkout@v3
 
+    - name: Log in to ACR
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build Docker image
+      run: |
+        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+        echo ${CURRENT_TAG}
+        cd $PWD/application/node-k8s-app
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/nodejs-app:${CURRENT_TAG} .
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/nodejs-app:${CURRENT_TAG}
+      
+
     # - name: Build and push Docker image
     #   run: |
     #     cd $PWD/node-k8s-app
@@ -36,15 +52,15 @@ jobs:
     #     path: trivy-report.json
     #     retention-days: 30
     
-    - name: Build and push Docker image
-      run: |
-        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
-        echo ${CURRENT_TAG}
-        cd $PWD/application/node-k8s-app
-        docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
-        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
-        echo "${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} is pushed"
+    # - name: Build and push Docker image
+    #   run: |
+    #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+    #     echo ${CURRENT_TAG}
+    #     cd $PWD/application/node-k8s-app
+    #     docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
+    #     echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
+        # echo "${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} is pushed"
 
   kubeconform:
     runs-on: ubuntu-latest
