@@ -73,7 +73,7 @@ spec:
       name: Fetch Skeleton
       action: fetch:template
       input:
-        url: ./skeleton
+        url: ./
         values:
           clusterName: ${{ parameters.clusterName }}
           description: ${{ parameters.description }}
