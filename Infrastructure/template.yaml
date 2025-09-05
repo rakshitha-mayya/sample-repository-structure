@@ -47,7 +47,7 @@ spec:
       action: fetch:template
       input:
         url: ./Infrastructure  # assumes aks.tf and var.tf are in this repo
-        # targetPath: ./
+        targetPath: ./Infrastructure
 
     - id: terraform-init
       name: Terraform Init
