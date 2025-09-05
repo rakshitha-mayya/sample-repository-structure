@@ -37,19 +37,19 @@ spec:
         url: ./application/app-2
         targetPath: ./app-2
 
-    # - id: install-deps
-    #   name: Install Dependencies
-    #   action: run:command
-    #   input:
-    #     workingDirectory: ./app-2
-    #     command: npm install
+    - id: install-deps
+      name: Install Dependencies
+      action: run:command
+      input:
+        workingDirectory: ./app-2
+        command: npm install
 
-    # - id: test
-    #   name: Run Tests
-    #   action: run:command
-    #   input:
-    #     workingDirectory: ./app-2
-    #     command: npm test || true
+    - id: test
+      name: Run Tests
+      action: run:command
+      input:
+        workingDirectory: ./app-2
+        command: npm test || true
 
     - id: publish
       name: Publish to GitHub
@@ -58,12 +58,12 @@ spec:
         description: Application deployed for ${{ parameters.appName }}
         repoUrl: ${{ parameters.repoUrl }}
 
-    # - id: register
-    #   name: Register in Backstage Catalog
-    #   action: catalog:register
-    #   input:
-    #     repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
-    #     catalogInfoPath: '/catalog-info.yaml'
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
 
   output:
     links:
