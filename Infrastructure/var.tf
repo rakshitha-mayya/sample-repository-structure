@@ -50,7 +50,7 @@ variable "location" {
 variable "aks_cluster_name" {
   description = "AKS cluster name"
   type        = string
-  default     = "az-pe-cluster-new"
+  default     = "az-pe-cluster"
 }
 
 variable "node_count" {
