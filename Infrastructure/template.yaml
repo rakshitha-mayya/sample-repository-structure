@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: app-deployment
   title: App Deployment
-  description: Deploys an application and publishes it to GitHub, then registers it in Backstage.
+  description: Deploys an application to a selected cluster using details from deploy-iac-template.
   tags:
     - backstage
     - app
@@ -13,57 +13,31 @@ spec:
   type: service
 
   parameters:
-    - title: Application Deployment Inputs
+    - title: Cluster Selection
       required:
-        - appName
-        - repoUrl
+        - clusterName
       properties:
-        appName:
-          title: Application Name
+        clusterName:
+          title: Cluster Name
           type: string
-        repoUrl:
-          title: Repository Location
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
 
   steps:
-    - id: fetch-app
-      name: Fetch App Skeleton
-      action: fetch:template
+    - id: fetch-cluster-details
+      name: Fetch Cluster Details
+      action: fetch:plain
       input:
-        url: ./application/app-2
-        targetPath: ./app-2
+        url: ./Infrastructure/deploy-iac-template
+        targetPath: ./cluster-details.txt
 
-    - id: install-deps
-      name: Install Dependencies
-      action: run:command
+    - id: parse-cluster-details
+      name: Parse Cluster Details
+      action: script:run
       input:
-        workingDirectory: ./app-2
-        run: npm install
+        script: |
+          #!/bin/bash
+          grep "${{ parameters.clusterName }}" ./cluster-details.txt > ./selected-cluster.txt
 
-    - id: test
-      name: Run Tests
-      action: run:command
-      input:
-        workingDirectory: ./app-2
-        command: npm test || true
-
-    - id: publish
-      name: Publish to GitHub
-      action: publish:github
-      input:
-        description: Application deployed for ${{ parameters.appName }}
-        repoUrl: ${{ parameters.repoUrl }}
-
-    - id: register
-      name: Register in Backstage Catalog
-      action: catalog:register
-      input:
-        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
+    # Add your deployment steps here, using ./selected-cluster.txt as input
 
   output:
     links:
