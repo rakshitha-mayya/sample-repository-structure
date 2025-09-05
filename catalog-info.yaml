@@ -1,22 +1,21 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.name }}
+  name: ${{ values.clusterName }}
   description: ${{ values.description }}
   annotations:
     github.com/project-slug: ${{ values.repoUrl | parseRepoUrl | pick('owner') }}/${{ values.repoUrl | parseRepoUrl | pick('repo') }}
     backstage.io/techdocs-ref: dir:.
   tags:
-    - aws
-    - ec2
-    - terraform
+    - azure
+    - aks
+    - kubernetes
     - infrastructure
   links:
-    - url: https://console.aws.amazon.com/ec2/v2/home?region=${{ values.aws_region }}
-      title: Azure cluster
+    - url: https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.ContainerService%2FManagedClusters
+      title: Azure AKS Clusters
       icon: cloud
 spec:
   type: infrastructure
   lifecycle: experimental
-  owner: user:kjchandan #guest
-  # system: cloud-infrastructure
+  owner: user:kjchandan
