@@ -1,51 +1,26 @@
-
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: cloud-infra-and-app-deployment
-  title: Cloud Infra & App Deployment
-  description: Provision cloud infrastructure (AKS/EC2) and deploy application, then register in Backstage.
+  name: app-deployment
+  title: App Deployment
+  description: Deploys an application and publishes it to GitHub, then registers it in Backstage.
   tags:
     - backstage
-    - cloud
-    - terraform
+    - app
     - github
 spec:
   owner: platform-team
   type: service
 
   parameters:
-    - title: Cloud Provider & Infra Inputs
+    - title: Application Deployment Inputs
       required:
-        - clusterName
-        - resourceGroup
-        - clientId
-        - clientSecret
-        - tenantId
-        - subscriptionId
-      properties:
-        clusterName:
-          title: Cluster Name
-          type: string
-        resourceGroup:
-          title: Resource Group Name
-          type: string
-        clientId:
-          title: Azure Client ID
-          type: string
-        clientSecret:
-          title: Azure Client Secret
-          type: string
-        tenantId:
-          title: Azure Tenant ID
-          type: string
-        subscriptionId:
-          title: Azure Subscription ID
-          type: string
-    - title: Repository Information
-      required:
+        - appName
         - repoUrl
       properties:
+        appName:
+          title: Application Name
+          type: string
         repoUrl:
           title: Repository Location
           type: string
@@ -55,34 +30,6 @@ spec:
               - github.com
 
   steps:
-    - id: fetch-terraform
-      name: Fetch Terraform code
-      action: fetch:template
-      input:
-        url: ./Infrastructure
-        targetPath: ./Infrastructure
-
-    - id: terraform-init
-      name: Terraform Init
-      action: shell:exec
-      input:
-        workingDirectory: ./infra
-        command: terraform init
-    - id: terraform-apply
-      name: Terraform Apply
-      action: shell:exec
-      input:
-        workingDirectory: ./infra
-        command: >
-          terraform apply -auto-approve
-          -var "aks_cluster_name=${{ parameters.clusterName }}"
-          -var "resource_group_name=${{ parameters.resourceGroup }}"
-          -var "clientid=${{ parameters.clientId }}"
-          -var "secretvalue=${{ parameters.clientSecret }}"
-          -var "tenantid=${{ parameters.tenantId }}"
-          -var "subscriptionid=${{ parameters.subscriptionId }}"
-
-      
     - id: fetch-app
       name: Fetch App Skeleton
       action: fetch:template
@@ -90,11 +37,25 @@ spec:
         url: ./application/app-2
         targetPath: ./app-2
 
+    - id: install-deps
+      name: Install Dependencies
+      action: run:command
+      input:
+        workingDirectory: ./app-2
+        command: npm install
+
+    - id: test
+      name: Run Tests
+      action: run:command
+      input:
+        workingDirectory: ./app-2
+        command: npm test || true
+
     - id: publish
       name: Publish to GitHub
       action: publish:github
       input:
-        description: Application and infra deployed for ${{ parameters.clusterName }}
+        description: Application deployed for ${{ parameters.appName }}
         repoUrl: ${{ parameters.repoUrl }}
 
     - id: register
@@ -106,8 +67,6 @@ spec:
 
   output:
     links:
-      - title: Azure Portal
-        url: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.ContainerService%2FmanagedClusters
       - title: Repository
         url: ${{ steps.publish.output.remoteUrl }}
       - title: Open in catalog
