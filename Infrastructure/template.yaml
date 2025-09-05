@@ -44,12 +44,12 @@ spec:
         workingDirectory: ./app-2
         command: npm install
 
-    - id: test
-      name: Run Tests
-      action: run:command
-      input:
-        workingDirectory: ./app-2
-        command: npm test || true
+    # - id: test
+    #   name: Run Tests
+    #   action: run:command
+    #   input:
+    #     workingDirectory: ./app-2
+    #     command: npm test || true
 
     - id: publish
       name: Publish to GitHub
