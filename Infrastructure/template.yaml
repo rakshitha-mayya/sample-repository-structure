@@ -64,14 +64,14 @@ spec:
 
     - id: terraform-init
       name: Terraform Init
-      action: run:command
+      action: execute:command
       input:
         workingDirectory: ./Infrastructure
         command: terraform init
 
     - id: terraform-apply
       name: Terraform Apply
-      action: run:command
+      action: execute:command
       input:
         workingDirectory: ./Infrastructure
         command: >
