@@ -1,19 +1,21 @@
+
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: aks-cluster-deployment
-  title: AKS Cluster Deployment
-  description: Provision an AKS cluster and supporting resources using Terraform
+  name: cloud-infra-and-app-deployment
+  title: Cloud Infra & App Deployment
+  description: Provision cloud infrastructure (AKS/EC2) and deploy application, then register in Backstage.
   tags:
-    - azure
-    - aks
+    - backstage
+    - cloud
     - terraform
+    - github
 spec:
   owner: platform-team
   type: service
 
   parameters:
-    - title: Azure AKS Cluster Inputs
+    - title: Cloud Provider & Infra Inputs
       required:
         - clusterName
         - resourceGroup
@@ -40,13 +42,24 @@ spec:
         subscriptionId:
           title: Azure Subscription ID
           type: string
+    - title: Repository Information
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
 
   steps:
-    - id: fetch
+    - id: fetch-terraform
       name: Fetch Terraform code
       action: fetch:template
       input:
-        url: ./Infrastructure  # assumes aks.tf and var.tf are in this repo
+        url: ./Infrastructure
         targetPath: ./Infrastructure
 
     - id: terraform-init
@@ -70,7 +83,33 @@ spec:
           -var "tenantid=${{ parameters.tenantId }}"
           -var "subscriptionid=${{ parameters.subscriptionId }}"
 
+    - id: fetch-app
+      name: Fetch App Skeleton
+      action: fetch:template
+      input:
+        url: ./application/app-2
+        targetPath: ./app-2
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        description: Application and infra deployed for ${{ parameters.clusterName }}
+        repoUrl: ${{ parameters.repoUrl }}
+
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
   output:
     links:
       - title: Azure Portal
         url: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.ContainerService%2FmanagedClusters
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
