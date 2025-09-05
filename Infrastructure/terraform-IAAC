@@ -36,7 +36,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   # Use the same RG for nodes (avoid subscription-level permission issues)
-  node_resource_group = "mc-resource-group"
+  node_resource_group = "mc-resource-group-pe"
 
   tags = {
     Department  = "delivery"
@@ -86,7 +86,7 @@ data "azurerm_client_config" "current" {}
 
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
-  name                  = "pe-grafana-test"
+  name                  = "pe-grafana"
   resource_group_name   = data.azurerm_resource_group.aks_rg.name
   location              = data.azurerm_resource_group.aks_rg.location
   sku                   = "Standard"
@@ -131,7 +131,7 @@ resource "azurerm_role_assignment" "user_acr_push" {
 
 # Key Vault
 resource "azurerm_key_vault" "aks_kv" {
-  name                        = replace("kv-aks${var.aks_cluster_name}", "-", "")
+  name                        = replace("pe-aks${var.aks_cluster_name}", "-", "")
   location                    = data.azurerm_resource_group.aks_rg.location
   resource_group_name         = data.azurerm_resource_group.aks_rg.name
   tenant_id                   = var.tenantid
