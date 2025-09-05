@@ -32,7 +32,7 @@ spec:
     - title: Azure Configuration
       required:
         - azure_region
-        - resource_group
+        # - resource_group
       properties:
         azure_region:
           title: Azure Region
@@ -47,15 +47,15 @@ spec:
             - East US
             - West US 2
             - West Europe
-        resource_group:
-          title: Resource Group
-          type: string
-          description: Name of the Azure Resource Group
-        node_count:
-          title: Node Count
-          type: integer
-          description: Number of nodes in the AKS cluster
-          default: 3
+        # resource_group:
+        #   title: Resource Group
+        #   type: string
+        #   description: Name of the Azure Resource Group
+        # node_count:
+        #   title: Node Count
+        #   type: integer
+        #   description: Number of nodes in the AKS cluster
+        #   default: 3
     - title: Repository Information
       required:
         - repoUrl
