@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.name }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: ${{ values.repoUrl | parseRepoUrl | pick('owner') }}/${{ values.repoUrl | parseRepoUrl | pick('repo') }}
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - aws
+    - ec2
+    - terraform
+    - infrastructure
+  links:
+    - url: https://console.aws.amazon.com/ec2/v2/home?region=${{ values.aws_region }}
+      title: Azure cluster
+      icon: cloud
+spec:
+  type: infrastructure
+  lifecycle: experimental
+  owner: user:kjchandan #guest
+  # system: cloud-infrastructure
