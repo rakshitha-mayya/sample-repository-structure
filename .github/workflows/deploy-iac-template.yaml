@@ -3,7 +3,7 @@ name: Deploy IaC template
 on:
   push:
     branches:
-      - manin
+      - main
   # workflow_dispatch:
 
 env:
