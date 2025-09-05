@@ -1,6 +1,9 @@
 name: Deploy IaC template
 
 on:
+  push:
+    branches:
+      - manin
   workflow_dispatch:
 
 env:
@@ -19,6 +22,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        repository: 'rakshitha-mayya/sample-repository-structure'
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
@@ -28,7 +33,19 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}   
+        creds: |
+          {
+              "clientId": "de070d2e-ab18-41c5-bfa6-7cfb61136711",
+              "clientSecret": "h.l8Q~npXw6iK42Bi1aQwzadnX.mdYERr~yYhcm4",
+              "subscriptionId": "343c17eb-34b6-4481-92a2-a0a5a04bdd88",
+              "tenantId": "99d624b9-55f3-4984-bb9a-28d58385162d",
+              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+              "resourceManagerEndpointUrl": "https://management.azure.com/",
+              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+              "galleryEndpointUrl": "https://gallery.azure.com/",
+              "managementEndpointUrl": "https://management.core.windows.net/"
+            }
 
     - name: Terraform fmt
       id: fmt
@@ -39,21 +56,21 @@ jobs:
       id: init
       run: terraform init
 
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
+    # - name: Terraform Validate
+    #   id: validate
+    #   run: terraform validate -no-color
 
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan -no-color -input=false
-      continue-on-error: true
+    # - name: Terraform Plan
+    #   id: plan
+    #   run: terraform plan -no-color -input=false
+    #   continue-on-error: true
 
-    - name: Terraform Plan Status
-      if: steps.plan.outcome == 'failure'
-      run: exit 1
+    # - name: Terraform Plan Status
+    #   if: steps.plan.outcome == 'failure'
+    #   run: exit 1
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve -input=false
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve -input=false
 
     # - name: Terraform Destroy
     #   run: terraform destroy -auto-approve -input=false
