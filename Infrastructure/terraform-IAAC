@@ -9,26 +9,16 @@ terraform {
 
 provider "azurerm" {
   features {}
-  use_cli = true
-
-  client_id       = var.clientid
-  client_secret   = var.secretvalue
-  tenant_id       = var.tenantid
-  subscription_id = var.subscriptionid
+  use_cli           = true
+  client_id         = var.clientid
+  client_secret     = var.secretvalue
+  tenant_id         = var.tenantid
+  subscription_id   = var.subscriptionid
 }
 
-# Primary Resource Group (you already own this one)
+# Primary Resource Group (already owned by you)
 data "azurerm_resource_group" "aks_rg" {
   name = var.resource_group_name
-}
-
-# Create Log Analytics Workspace
-resource "azurerm_log_analytics_workspace" "aks_logs" {
-  name                = "${var.aks_cluster_name}-logs"
-  location            = data.azurerm_resource_group.aks_rg.location
-  resource_group_name = data.azurerm_resource_group.aks_rg.name
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
 }
 
 
@@ -45,11 +35,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size    = var.node_vm_size
   }
 
-  # Let AKS create and manage this RG automatically
-  node_resource_group = "mc-rg-aks-managed-pe"
+  # Use the same RG for nodes (avoid subscription-level permission issues)
+  node_resource_group = "mc-resource-group"
 
   tags = {
-    Environment = "POC"
     Department  = "delivery"
     Owner       = "Pushpreet.Singh1@kyndryl.com"
   }
@@ -60,38 +49,47 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   kubernetes_version = "1.33.1"
 
-    oms_agent {
+  oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs.id
   }
 
- role_based_access_control_enabled = true
+  role_based_access_control_enabled = true
 
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = true
     tenant_id          = var.tenantid
-}
+  }
 
   network_profile {
-    network_plugin    = "azure"
-  
-}
+    network_plugin = "azure"
+  }
 }
 
-# Output kubeconfig for access
+# Output kubeconfig
 output "kube_config" {
   value     = azurerm_kubernetes_cluster.aks.kube_config_raw
   sensitive = true
 }
 
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "aks_logs" {
+  name                = "${var.aks_cluster_name}-logs"
+  location            = data.azurerm_resource_group.aks_rg.location
+  resource_group_name = data.azurerm_resource_group.aks_rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
 
-# Get current client info (so you can assign roles to yourself)
+
+# Current user info
 data "azurerm_client_config" "current" {}
 
+# Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
-  name                = "pe-grafana"
-  resource_group_name = data.azurerm_resource_group.aks_rg.name
-  location            = data.azurerm_resource_group.aks_rg.location
-  sku                 = "Standard"
+  name                  = "pe-grafana-test"
+  resource_group_name   = data.azurerm_resource_group.aks_rg.name
+  location              = data.azurerm_resource_group.aks_rg.location
+  sku                   = "Standard"
   grafana_major_version = 11
 
   identity {
@@ -99,46 +97,41 @@ resource "azurerm_dashboard_grafana" "aks_grafana" {
   }
 }
 
-# Give your user Grafana Admin role
+# Grafana Admin Role
 resource "azurerm_role_assignment" "grafana_admin" {
   scope                = azurerm_dashboard_grafana.aks_grafana.id
   role_definition_name = "Grafana Admin"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-
-# Azure Container Registry (ACR)
+# # ACR
 resource "azurerm_container_registry" "aks_acr" {
   name                = replace("${var.aks_cluster_name}acr", "-", "")
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   location            = data.azurerm_resource_group.aks_rg.location
-  sku                 = "Standard"        # Options: Basic, Standard, Premium
-  admin_enabled       = true              # Enables admin user for docker login
+  sku                 = "Standard"
+  admin_enabled       = true
 
-  tags = {
-    Environment = "POC"
-    Owner       = "pushpreet.singh1@kyndryl.com"
-  }
+  tags = var.default_tags
 }
 
-# Give AKS kubelet identity permission to pull from ACR
+# Allow AKS kubelet to pull from ACR
 resource "azurerm_role_assignment" "aks_acr_pull" {
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.aks_acr.id
 }
 
-# Give your user permission to push/pull from ACR
+# Allow your user to push/pull from ACR
 resource "azurerm_role_assignment" "user_acr_push" {
   principal_id         = data.azurerm_client_config.current.object_id
   role_definition_name = "AcrPush"
   scope                = azurerm_container_registry.aks_acr.id
 }
 
-
-# Create Key Vault (name must be globally unique, only alphanumeric allowed)
+# Key Vault
 resource "azurerm_key_vault" "aks_kv" {
-  name                        = replace("kv${var.aks_cluster_name}", "-", "")
+  name                        = replace("kv-aks${var.aks_cluster_name}", "-", "")
   location                    = data.azurerm_resource_group.aks_rg.location
   resource_group_name         = data.azurerm_resource_group.aks_rg.name
   tenant_id                   = var.tenantid
@@ -150,26 +143,16 @@ resource "azurerm_key_vault" "aks_kv" {
   tags = var.default_tags
 }
 
-# Assign Key Vault Administrator role to your user
+# Key Vault Admin Role for you
 resource "azurerm_role_assignment" "kv_admin_user" {
   scope                = azurerm_key_vault.aks_kv.id
   role_definition_name = "Key Vault Administrator"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-# Assign Key Vault Secrets User role to AKS cluster identity
+# Key Vault Secrets User Role for AKS
 resource "azurerm_role_assignment" "kv_secrets_user" {
   scope                = azurerm_key_vault.aks_kv.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
 }
-
-# resource "null_resource" "argocd_install" {
-#   depends_on = [azurerm_kubernetes_cluster.aks]
-
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-#       kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-#     EOT
-#   }
