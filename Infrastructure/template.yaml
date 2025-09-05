@@ -39,10 +39,10 @@ spec:
 
     - id: install-deps
       name: Install Dependencies
-      action: run:command
+      # action: run:command
       input:
         workingDirectory: ./app-2
-        command: npm install
+        run: npm install
 
     - id: test
       name: Run Tests
