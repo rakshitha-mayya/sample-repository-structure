@@ -37,12 +37,12 @@ spec:
         url: ./application/app-2
         targetPath: ./app-2
 
-    - id: install-deps
-      name: Install Dependencies
-      action: run:command
-      input:
-        workingDirectory: ./app-2
-        command: npm install
+    # - id: install-deps
+    #   name: Install Dependencies
+    #   action: run:command
+    #   input:
+    #     workingDirectory: ./app-2
+    #     command: npm install
 
     # - id: test
     #   name: Run Tests
