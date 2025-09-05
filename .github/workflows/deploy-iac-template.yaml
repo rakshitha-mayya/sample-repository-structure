@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  # workflow_dispatch:
+  workflow_dispatch:
 
 env:
   TF_VERSION: 1.5.0
@@ -17,7 +17,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./infrastructure/terraform
+        working-directory: ./infrastructure
 
     steps:
     - name: Checkout
@@ -54,23 +54,27 @@ jobs:
 
     - name: Terraform Init
       id: init
-      run: terraform init
+      run: |
+        cd infrastructure
+        terraform init
 
-    # - name: Terraform Validate
-    #   id: validate
-    #   run: terraform validate -no-color
+    - name: Terraform Validate
+      id: validate
+      run: |
+        cd infrastructure
+        terraform validate -no-color
 
-    # - name: Terraform Plan
-    #   id: plan
-    #   run: terraform plan -no-color -input=false
-    #   continue-on-error: true
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -input=false
+      continue-on-error: true
 
-    # - name: Terraform Plan Status
-    #   if: steps.plan.outcome == 'failure'
-    #   run: exit 1
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
 
-    # - name: Terraform Apply
-    #   run: terraform apply -auto-approve -input=false
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -input=false
 
     # - name: Terraform Destroy
     #   run: terraform destroy -auto-approve -input=false
