@@ -66,21 +66,21 @@ spec:
       name: Terraform Init
       action: shell:exec
       input:
-    workingDirectory: ./infra
-    command: terraform init
-- id: terraform-apply
-  name: Terraform Apply
-  action: shell:exec
-  input:
-    workingDirectory: ./infra
-    command: >
-      terraform apply -auto-approve
-      -var "aks_cluster_name=${{ parameters.clusterName }}"
-      -var "resource_group_name=${{ parameters.resourceGroup }}"
-      -var "clientid=${{ parameters.clientId }}"
-      -var "secretvalue=${{ parameters.clientSecret }}"
-      -var "tenantid=${{ parameters.tenantId }}"
-      -var "subscriptionid=${{ parameters.subscriptionId }}"
+        workingDirectory: ./infra
+        command: terraform init
+  - id: terraform-apply
+    name: Terraform Apply
+    action: shell:exec
+    input:
+      workingDirectory: ./infra
+      command: >
+        terraform apply -auto-approve
+        -var "aks_cluster_name=${{ parameters.clusterName }}"
+        -var "resource_group_name=${{ parameters.resourceGroup }}"
+        -var "clientid=${{ parameters.clientId }}"
+        -var "secretvalue=${{ parameters.clientSecret }}"
+        -var "tenantid=${{ parameters.tenantId }}"
+        -var "subscriptionid=${{ parameters.subscriptionId }}"
 
       
     - id: fetch-app
