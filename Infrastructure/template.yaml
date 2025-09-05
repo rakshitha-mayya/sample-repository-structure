@@ -1,0 +1,76 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: aks-cluster-deployment
+  title: AKS Cluster Deployment
+  description: Provision an AKS cluster and supporting resources using Terraform
+  tags:
+    - azure
+    - aks
+    - terraform
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Azure AKS Cluster Inputs
+      required:
+        - clusterName
+        - resourceGroup
+        - clientId
+        - clientSecret
+        - tenantId
+        - subscriptionId
+      properties:
+        clusterName:
+          title: Cluster Name
+          type: string
+        resourceGroup:
+          title: Resource Group Name
+          type: string
+        clientId:
+          title: Azure Client ID
+          type: string
+        clientSecret:
+          title: Azure Client Secret
+          type: string
+        tenantId:
+          title: Azure Tenant ID
+          type: string
+        subscriptionId:
+          title: Azure Subscription ID
+          type: string
+
+  steps:
+    - id: fetch
+      name: Fetch Terraform code
+      action: fetch:template
+      input:
+        url: ./  # assumes aks.tf and var.tf are in this repo
+        targetPath: ./infra
+
+    - id: terraform-init
+      name: Terraform Init
+      action: run:command
+      input:
+        workingDirectory: ./infra
+        command: terraform init
+
+    - id: terraform-apply
+      name: Terraform Apply
+      action: run:command
+      input:
+        workingDirectory: ./infra
+        command: >
+          terraform apply -auto-approve
+          -var "aks_cluster_name=${{ parameters.clusterName }}"
+          -var "resource_group_name=${{ parameters.resourceGroup }}"
+          -var "clientid=${{ parameters.clientId }}"
+          -var "secretvalue=${{ parameters.clientSecret }}"
+          -var "tenantid=${{ parameters.tenantId }}"
+          -var "subscriptionid=${{ parameters.subscriptionId }}"
+
+  output:
+    links:
+      - title: Azure Portal
+        url: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.ContainerService%2FmanagedClusters
