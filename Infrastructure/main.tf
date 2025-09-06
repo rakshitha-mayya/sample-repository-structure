@@ -5,6 +5,11 @@ terraform {
       version = "=4.41.0"
     }
   }
+  backend "azurerm" {
+    resource_group_name   = "rg-cp-pe-pattern"
+    storage_account_name  = "petffile"
+    container_name        = "terraformtffile"
+  }
 }
 
 provider "azurerm" {
