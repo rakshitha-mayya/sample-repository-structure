@@ -75,7 +75,6 @@ spec:
       action: publish:github
       input:
         repoUrl: 'github.com/rakshitha-mayya/sample-repository-structure'
-        branchName: main
         description: Update from Backstage scaffolder
         token: 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
 
