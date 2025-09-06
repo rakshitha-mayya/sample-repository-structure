@@ -28,22 +28,22 @@ jobs:
       with:
         terraform_version: ${{ env.TF_VERSION }}
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: |
-          {
-              "clientId": "657f814b-9667-4e5a-a3d4-3f264ff38bb4",
-              "clientSecret": "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG",
-              "subscriptionId": "05276564-4a5f-40d6-b156-3ed5768e3bf3",
-              "tenantId": "8196ddea-f6c5-4044-8209-53ad1fdaebbf",
-              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-              "resourceManagerEndpointUrl": "https://management.azure.com/",
-              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-              "galleryEndpointUrl": "https://gallery.azure.com/",
-              "managementEndpointUrl": "https://management.core.windows.net/"
-            }
+    # - name: Azure Login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: |
+    #       {
+    #           "clientId": "657f814b-9667-4e5a-a3d4-3f264ff38bb4",
+    #           "clientSecret": "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG",
+    #           "subscriptionId": "05276564-4a5f-40d6-b156-3ed5768e3bf3",
+    #           "tenantId": "8196ddea-f6c5-4044-8209-53ad1fdaebbf",
+    #           "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+    #           "resourceManagerEndpointUrl": "https://management.azure.com/",
+    #           "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+    #           "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+    #           "galleryEndpointUrl": "https://gallery.azure.com/",
+    #           "managementEndpointUrl": "https://management.core.windows.net/"
+    #         }
 
     - name: Set Terraform environment variables
       run: |
