@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.clusterName }}
-  description: ${{ values.description }}
+  name: az-pe-cluster
+  description: Sample cluster
   annotations:
     github.com/project-slug: https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml
     backstage.io/techdocs-ref: dir:.
