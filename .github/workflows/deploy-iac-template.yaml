@@ -1,9 +1,9 @@
 name: Deploy IaC template
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 env:
@@ -17,13 +17,11 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./infrastructure
+        working-directory: Infrastructure
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        repository: 'rakshitha-mayya/sample-repository-structure'
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
@@ -55,13 +53,14 @@ jobs:
     - name: Terraform Init
       id: init
       run: |
-        cd infrastructure
+        echo "$PWD"
+        # cd $PWD/infrastructure
         terraform init
 
     - name: Terraform Validate
       id: validate
       run: |
-        cd infrastructure
+        # cd $PWD/infrastructure
         terraform validate -no-color
 
     - name: Terraform Plan
@@ -73,11 +72,11 @@ jobs:
       if: steps.plan.outcome == 'failure'
       run: exit 1
 
-    - name: Terraform Apply
-      run: terraform apply -auto-approve -input=false
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve -input=false
 
-    # - name: Terraform Destroy
-    #   run: terraform destroy -auto-approve -input=false
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve -input=false
 
     # - name: Get Terraform Outputs
     #   if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event.inputs.action == 'apply'
