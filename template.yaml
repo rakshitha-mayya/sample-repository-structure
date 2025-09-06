@@ -16,7 +16,7 @@ spec:
     - title: Cluster Information
       required:
         - clusterName
-        # - description
+        - description
       properties:
         clusterName:
           title: Cluster Name
@@ -47,10 +47,10 @@ spec:
             - East US
             - West US 2
             - West Europe
-        # resource_group:
-        #   title: Resource Group
-        #   type: string
-        #   description: Name of the Azure Resource Group
+        resource_group:
+          title: Resource Group
+          type: string
+          description: Name of the Azure Resource Group
         # node_count:
         #   title: Node Count
         #   type: integer
@@ -78,8 +78,8 @@ spec:
           clusterName: ${{ parameters.clusterName }}
           description: ${{ parameters.description }}
           azure_region: ${{ parameters.azure_region }}
-          # resource_group: ${{ parameters.resource_group }}
-          # node_count: ${{ parameters.node_count }}
+          resource_group: ${{ parameters.resource_group }}
+          node_count: ${{ parameters.node_count }}
           repoUrl: ${{ parameters.repoUrl }}
     - id: publish
       name: Publish
@@ -100,5 +100,3 @@ spec:
       - title: Open in catalog
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
-
- 
