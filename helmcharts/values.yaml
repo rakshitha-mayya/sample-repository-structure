@@ -1,8 +1,8 @@
 name: nodejs-app
 replicaCount: 1
 image:
-  repository: rakshithamayya/node-k8s-app
+  repository: azpeclusteracr.azurecr.io/nodejs-app
   tag: a2ac79c
 service:
-  type: NodePort
+  type: LoadBalancer
   port: 3000
