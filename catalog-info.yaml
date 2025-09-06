@@ -1,14 +1,11 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: az-pe-cluster
-  description: Sample cluster
+  name: ${{ values.clusterName }}
+  description: ${{ values.description }}
   annotations:
-    # github.com/project-slug: https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml
-    # backstage.io/techdocs-ref: dir:.
-    github.com/project-slug: rakshitha-mayya/sample-repository-structure
-    github.com/workflows: terraform.yml
- 
+    github.com/project-slug: ${{ values.repoUrl | parseRepoUrl | pick('owner') }}/${{ values.repoUrl | parseRepoUrl | pick('repo') }}
+    backstage.io/techdocs-ref: dir:.
   tags:
     - azure
     - aks
@@ -22,3 +19,4 @@ spec:
   type: infrastructure
   lifecycle: experimental
   owner: user:kjchandan
+ 
