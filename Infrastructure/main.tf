@@ -9,6 +9,7 @@ terraform {
     resource_group_name   = "rg-cp-pe-pattern"
     storage_account_name  = "petffile"
     container_name        = "terraformtffile"
+    key = "bG4CKP7YvUbLBn/h2X7NXcasGcYiZRCmslLd/QxUY19rErfUB9jo2rUrnZQyNyJu7+4QydXD0OoC+AStBy9FaA=="
   }
 }
 
