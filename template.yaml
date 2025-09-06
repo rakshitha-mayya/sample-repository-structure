@@ -73,12 +73,12 @@ spec:
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: 'https://github.com/rakshitha-mayya/sample-repository-structure'
+        repoContentsUrl: 'https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml'
         catalogInfoPath: '/catalog-info.yaml'
   output:
     links:
       - title: Repository
-        url: 'https://github.com/rakshitha-mayya/sample-repository-structure'
+        url: 'https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml'
       - title: Open in catalog
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
