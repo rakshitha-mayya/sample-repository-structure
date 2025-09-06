@@ -1,44 +1,35 @@
-# Service Principal Name ( App Name): 	app-cp-pe-pattern-poc
-# Application (client) ID :		de070d2e-ab18-41c5-bfa6-7cfb61136711
-# Object ID :	c496efd8-d632-4e29-a9a9-ee891efccaac
-# Directory (tenant) ID :		99d624b9-55f3-4984-bb9a-28d58385162d
-# Secret Name : 	skt-app-cp-pe-pattern-poc
-# Secret ID : 	d779d7cd-c0a3-4ed9-b33d-935e644e73db
-# Secret Value : 	h.l8Q~npXw6iK42Bi1aQwzadnX.mdYERr~yYhcm4
-
-
 variable "clientid" {
   description = "client id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "de070d2e-ab18-41c5-bfa6-7cfb61136711"
+  default = "657f814b-9667-4e5a-a3d4-3f264ff38bb4"
 }
 
 variable "tenantid" {
   description = "tenant id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "99d624b9-55f3-4984-bb9a-28d58385162d"
+  default = "8196ddea-f6c5-4044-8209-53ad1fdaebbf"
 }
 
 variable "secretvalue" {
   description = "secretvalue id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "h.l8Q~npXw6iK42Bi1aQwzadnX.mdYERr~yYhcm4"
+  default = "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG"
 }
 
 variable "subscriptionid" {
   description = "secretvalue id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "343c17eb-34b6-4481-92a2-a0a5a04bdd88"
+  default = "05276564-4a5f-40d6-b156-3ed5768e3bf3"
 }
 
 variable "resource_group_name" {
   description = "Name of the existing Resource Group where AKS and resources will be created"
   type        = string
-  default     = "rg-cp-pe-pattern-poc4"
+  default     = "rg-cp-pe-pattern"
 }
 
 variable "location" {
@@ -74,4 +65,72 @@ variable "default_tags" {
     Department  = "delivery"
     Owner       = "Pushpreet.Singh1@kyndryl.com"
   }
+}
+
+variable "alb_name" {
+  description = "Name of the public Azure Load Balancer"
+  type        = string
+  default     = "pe-alb"
+}
+
+variable "alb_frontend_name" {
+  description = "Frontend IP configuration name"
+  type        = string
+  default     = "public-frontend"
+}
+
+variable "alb_backend_pool_name" {
+  description = "Backend pool name"
+  type        = string
+  default     = "backendpool"
+}
+
+variable "alb_rule_protocol" {
+  description = "LB rule protocol"
+  type        = string
+  default     = "Tcp"
+  validation {
+    condition     = contains(["Tcp", "Udp"], var.alb_rule_protocol)
+    error_message = "alb_rule_protocol must be Tcp or Udp."
+  }
+}
+
+variable "alb_rule_frontend_port" {
+  description = "Frontend port"
+  type        = number
+  default     = 80
+}
+
+variable "alb_rule_backend_port" {
+  description = "Backend port"
+  type        = number
+  default     = 80
+}
+
+variable "alb_probe_protocol" {
+  description = "Health probe protocol"
+  type        = string
+  default     = "Tcp"
+  validation {
+    condition     = contains(["Tcp", "Http"], var.alb_probe_protocol)
+    error_message = "alb_probe_protocol must be Tcp or Http."
+  }
+}
+
+variable "alb_probe_port" {
+  description = "Health probe port"
+  type        = number
+  default     = 80
+}
+
+variable "alb_probe_request_path" {
+  description = "HTTP probe path (used when alb_probe_protocol = Http)"
+  type        = string
+  default     = "/"
+}
+
+variable "enable_alb_outbound_rule" {
+  description = "Create an outbound SNAT rule on the public ALB"
+  type        = bool
+  default     = false
 }
