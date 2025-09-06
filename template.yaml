@@ -78,8 +78,8 @@ spec:
           clusterName: ${{ parameters.clusterName }}
           description: ${{ parameters.description }}
           azure_region: ${{ parameters.azure_region }}
-          resource_group: ${{ parameters.resource_group }}
-          node_count: ${{ parameters.node_count }}
+          # resource_group: ${{ parameters.resource_group }}
+          # node_count: ${{ parameters.node_count }}
           repoUrl: ${{ parameters.repoUrl }}
     - id: publish
       name: Publish
