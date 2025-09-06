@@ -4,8 +4,11 @@ metadata:
   name: az-pe-cluster
   description: Sample cluster
   annotations:
-    github.com/project-slug: https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml
-    backstage.io/techdocs-ref: dir:.
+    /*github.com/project-slug: https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml
+    backstage.io/techdocs-ref: dir:.*/
+    github.com/project-slug: rakshitha-mayya/sample-repository-structure
+    github.com/workflows: terraform.yml
+ 
   tags:
     - azure
     - aks
