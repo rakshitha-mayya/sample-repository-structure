@@ -4,7 +4,7 @@ metadata:
   name: ${{ values.clusterName }}
   description: ${{ values.description }}
   annotations:
-    github.com/project-slug: ${{ values.repoUrl | parseRepoUrl | pick('owner') }}/${{ values.repoUrl | parseRepoUrl | pick('repo') }}
+    github.com/project-slug: https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml
     backstage.io/techdocs-ref: dir:.
   tags:
     - azure
