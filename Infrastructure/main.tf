@@ -132,7 +132,7 @@ resource "azurerm_role_assignment" "user_acr_push" {
 
 # Key Vault
 resource "azurerm_key_vault" "aks_kv" {
-  name                        = replace("pe-aks${var.aks_cluster_name}", "-", "")
+  name                        = replace("pe-aks-new${var.aks_cluster_name}", "-", "")
   location                    = azurerm_resource_group.aks_rg.location
   resource_group_name         = azurerm_resource_group.aks_rg.name
   tenant_id                   = var.tenantid
