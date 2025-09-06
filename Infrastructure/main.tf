@@ -196,7 +196,7 @@ resource "azurerm_lb" "alb" {
   }
 
   tags = var.default_tags
-}*/
+}
 
 # Backend Pool
 resource "azurerm_lb_backend_address_pool" "alb_backend" {
@@ -228,6 +228,7 @@ resource "azurerm_lb_rule" "alb_rule" {
   idle_timeout_in_minutes        = 4
   disable_outbound_snat          = false
 }
+*/
 # ------------------------------------------
 # ArgoCD Deployment
 # ------------------------------------------
