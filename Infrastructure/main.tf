@@ -313,7 +313,7 @@ data "kubernetes_service" "argocd_server" {
       }
     }
   }
-}
+}*/
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
@@ -327,4 +327,4 @@ output "argocd_namespace" {
 output "argocd_server_external_ip" {
   description = "External IP of ArgoCD LoadBalancer service"
   value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
-} */
+} 
