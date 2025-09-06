@@ -1,10 +1,10 @@
 name: Build-Deployment
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
 
 jobs:
   Image-build-and-deploy:
@@ -59,7 +59,11 @@ jobs:
         git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
         git push origin main
 
-
+    - name: deploy
+      run: |
+        cd helmcharts
+        az aks get-credentials --resource-group rg-cp-pe-pattern --name az-pe-cluster --overwrite-existing --admin
+        kubectl apply -f application.yaml -n argocd
         
     # - name: Deploy
     #   run: |
