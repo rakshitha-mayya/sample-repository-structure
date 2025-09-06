@@ -78,13 +78,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   network_profile {
     network_plugin = "azure"
   }
-  role_based_access_control {
-    enabled = true
-    azure_active_directory {
-      managed                = true
-      admin_group_object_ids = [var.admin_group_object_id] # <-- Cluster Admin group
-    }
-
 }
 
 # Output kubeconfig
@@ -239,21 +232,37 @@ resource "azurerm_lb_rule" "alb_rule" {
 # ArgoCD Deployment
 # ------------------------------------------
 
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate)
+}
+
+# ------------------------------------------
+# Helm Provider (for ArgoCD)
+# ------------------------------------------
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+    host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate)
   }
 }
 
+# ------------------------------------------
+# ArgoCD Namespace
+# ------------------------------------------
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
 }
 
+# ------------------------------------------
+# ArgoCD Helm Release
+# ------------------------------------------
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
@@ -268,22 +277,29 @@ server:
 EOF
   ]
 }
+data "kubernetes_service" "argocd_server" {
+  metadata {
+    name      = "argocd-server"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
+  }
 
+  depends_on = [helm_release.argocd]
+}
 # Demo Application Deployment via ArgoCD
 resource "kubernetes_manifest" "argocd_demo_app" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
-      name      = "demo-nginx"
+      name      = "node-js-app"
       namespace = "argocd"
     }
     spec = {
       project = "default"
       source = {
-        repoURL = "https://github.com/argoproj/argocd-example-apps"
-        targetRevision = "HEAD"
-        path = "guestbook"
+        repoURL = "https://github.com/kjchandan/sample-cluster"
+        targetRevision = "main"
+        path = "helmcharts"
       }
       destination = {
         server    = "https://kubernetes.default.svc"
@@ -295,22 +311,17 @@ resource "kubernetes_manifest" "argocd_demo_app" {
     }
   }
 }
-
+# ------------------------------------------
 # Outputs
+# ------------------------------------------
+output "argocd_release_name" {
+  value = helm_release.argocd.name
+}
+
+output "argocd_namespace" {
+  value = kubernetes_namespace.argocd.metadata[0].name
+}
 output "argocd_server_external_ip" {
-  description = "External IP of ArgoCD server service"
-  value       = helm_release.argocd.status[0].name
-}
-
-data "kubernetes_secret" "argocd_initial_password" {
-  metadata {
-    name      = "argocd-initial-admin-secret"
-    namespace = "argocd"
-  }
-}
-
-output "argocd_admin_password" {
-  description = "Initial admin password for ArgoCD"
-  value       = base64decode(data.kubernetes_secret.argocd_initial_password.data["password"])
-  sensitive   = true
+  description = "External IP of ArgoCD LoadBalancer service"
+  value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
 }
