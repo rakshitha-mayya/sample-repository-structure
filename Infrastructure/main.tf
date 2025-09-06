@@ -261,6 +261,7 @@ resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
+  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 # ------------------------------------------
