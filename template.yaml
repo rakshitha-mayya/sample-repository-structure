@@ -70,13 +70,16 @@ spec:
           resource_group: ${{ parameters.resource_group }}
           node_count: ${{ parameters.node_count }}
 
-    - id: publish
-      name: Publish to same repo
-      action: publish:github
-      input:
-        repoUrl: 'https://github.com/rakshitha-mayya/sample-repository-structure/blob/main/catalog-info.yaml'
-        description: Update from Backstage scaffolder
-        token: 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
+- id: publish
+  name: Publish to new branch
+  action: publish:github
+  input:
+    repoUrl: github.com?repo=sample-repository-structure&owner=rakshitha-mayya
+    defaultBranch: main
+    branchName: feature/${{ parameters.clusterName }}-${{ (now | date: "YYYYMMDDHHmmss") }}
+    description: Provisioned AKS cluster via Backstage
+    token: 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
+
 
         
     - id: register
