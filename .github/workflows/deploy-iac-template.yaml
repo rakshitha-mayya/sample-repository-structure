@@ -114,6 +114,7 @@ jobs:
         az aks get-credentials --resource-group rg-cp-pe-pattern --name az-pe-cluster --overwrite-existing --admin
         kubectl apply -f application.yaml -n argocd
 
+
     # - name: Terraform Destroy
     #   run: terraform destroy -auto-approve -input=false
 
