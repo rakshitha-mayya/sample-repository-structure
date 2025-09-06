@@ -16,7 +16,7 @@ spec:
     - title: Cluster Information
       required:
         - clusterName
-        - description
+        # - description
       properties:
         clusterName:
           title: Cluster Name
