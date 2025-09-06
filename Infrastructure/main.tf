@@ -93,7 +93,7 @@ data "azurerm_client_config" "current" {}
 
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
-  name                  = "pe-grafana"
+  name                  = "pe-grafana-new"
   resource_group_name   = azurerm_resource_group.aks_rg.name
   location              = azurerm_resource_group.aks_rg.location
   sku                   = "Standard"
