@@ -3,7 +3,7 @@ name: Build-Deployment
 on:
   push:
     branches:
-      - main
+      - main-1
 
 jobs:
   Image-build-and-deploy:
@@ -17,10 +17,10 @@ jobs:
       with:
         creds: |
           {
-              "clientId": "de070d2e-ab18-41c5-bfa6-7cfb61136711",
-              "clientSecret": "h.l8Q~npXw6iK42Bi1aQwzadnX.mdYERr~yYhcm4",
-              "subscriptionId": "343c17eb-34b6-4481-92a2-a0a5a04bdd88",
-              "tenantId": "99d624b9-55f3-4984-bb9a-28d58385162d",
+              "clientId": "657f814b-9667-4e5a-a3d4-3f264ff38bb4",
+              "clientSecret": "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG",
+              "subscriptionId": "05276564-4a5f-40d6-b156-3ed5768e3bf3",
+              "tenantId": "8196ddea-f6c5-4044-8209-53ad1fdaebbf",
               "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
               "resourceManagerEndpointUrl": "https://management.azure.com/",
               "activeDirectoryGraphResourceId": "https://graph.windows.net/",
