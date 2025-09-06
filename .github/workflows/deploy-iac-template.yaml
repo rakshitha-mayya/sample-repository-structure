@@ -17,7 +17,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: Infrastructure
+        # working-directory: Infrastructure
 
     steps:
     - name: Checkout
@@ -61,13 +61,13 @@ jobs:
       id: init
       run: |
         echo "$PWD"
-        # cd $PWD/infrastructure
+        cd $PWD/Infrastructure
         terraform init
 
     - name: Terraform Validate
       id: validate
       run: |
-        # cd $PWD/infrastructure
+        cd $PWD/Infrastructure
         terraform validate -no-color
 
     - name: Terraform Plan
