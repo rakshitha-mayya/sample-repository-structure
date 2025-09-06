@@ -55,7 +55,7 @@ jobs:
       run: |
         echo "$PWD"
         # cd $PWD/infrastructure
-        terraform init
+        terraform init --upgrade
 
     - name: Terraform Validate
       id: validate
