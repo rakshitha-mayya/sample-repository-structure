@@ -282,7 +282,7 @@ EOF
   ]
   depends_on = [kubernetes_namespace.argocd]
 }
-data "kubernetes_service" "argocd_server" {
+/*data "kubernetes_service" "argocd_server" {
   metadata {
     name      = "argocd-server"
     namespace = kubernetes_namespace.argocd.metadata[0].name
@@ -291,7 +291,7 @@ data "kubernetes_service" "argocd_server" {
   depends_on = [helm_release.argocd]
 }
 # Demo Application Deployment via ArgoCD
-/*resource "kubernetes_manifest" "argocd_demo_app" {
+resource "kubernetes_manifest" "argocd_demo_app" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -315,7 +315,7 @@ data "kubernetes_service" "argocd_server" {
       }
     }
   }
-}*/
+}
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
@@ -329,4 +329,4 @@ output "argocd_namespace" {
 output "argocd_server_external_ip" {
   description = "External IP of ArgoCD LoadBalancer service"
   value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
-}
+}*/
