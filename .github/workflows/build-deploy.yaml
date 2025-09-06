@@ -8,9 +8,12 @@ on:
 jobs:
   Image-build-and-deploy:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
     - name: Check out the repo
       uses: actions/checkout@v3
+      with:
+        persist-credentials: true 
 
     - name: Azure Login
       uses: azure/login@v1
@@ -28,27 +31,42 @@ jobs:
               "galleryEndpointUrl": "https://gallery.azure.com/",
               "managementEndpointUrl": "https://management.core.windows.net/"
             }
-    # - name: Docker login
-    #   run: az acr login --name azpeclusteracr
+            
+    - name: Docker login
+      run: az acr login --name azpeclusteracrpe
 
-    # - name: Build Docker image
-    #   run: |
-    #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
-    #     echo ${CURRENT_TAG}
-    #     cd $PWD/application/node-k8s-app
-    #     docker build -t azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG} .
-    #     docker push azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG}
-    - name: Install kubectl & kubelogin
-      run: |
-        az aks install-cli
-        
-    - name: Deploy
+    - name: Build Docker image
       run: |
         CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
         echo ${CURRENT_TAG}
+        cd $PWD/application/node-k8s-app
+        docker build -t azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG} .
+        docker push azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG}
+
+    - name: update tag
+      run: | 
+        CURRENT_TAG=$(git rev-parse --short HEAD)
+        echo "Current tag: ${CURRENT_TAG}"
+        
         cd helmcharts
-        az aks get-credentials --resource-group rg-cp-pe-pattern-poc4 --name az-pe-cluster --overwrite-existing --admin
-        kubectl apply -f application.yaml -n argocd
+        sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        git add values.yaml
+        git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
+        git push origin main
+
+
+        
+    # - name: Deploy
+    #   run: |
+    #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+    #     echo ${CURRENT_TAG}
+    #     cd helmcharts
+    #     az aks get-credentials --resource-group rg-cp-pe-pattern-poc4 --name az-pe-cluster --overwrite-existing --admin
+    #     kubectl apply -f application.yaml -n argocd
         # helm upgrade --install nodejs-app . -f values.yaml --set image.tag=${CURRENT_TAG} --debug
         # kubectl get pod
         # kubectl get svc 
