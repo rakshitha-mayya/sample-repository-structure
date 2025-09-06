@@ -3,7 +3,7 @@ name: Build-Deployment
 on:
   push:
     branches:
-      - main-1
+      - main
 
 jobs:
   Image-build-and-deploy:
@@ -48,14 +48,15 @@ jobs:
         echo ${CURRENT_TAG}
         cd helmcharts
         az aks get-credentials --resource-group rg-cp-pe-pattern-poc4 --name az-pe-cluster --overwrite-existing --admin
+        kubectl apply -f application.yaml -n argocd
         # helm upgrade --install nodejs-app . -f values.yaml --set image.tag=${CURRENT_TAG} --debug
         # kubectl get pod
         # kubectl get svc 
         # kubectl get event
-        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-        helm repo update
+        # helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        # helm repo update
 
-        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+        # helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
         # kubectl get pods -n ingress-nginx
         # kubectl describe svc ingress-nginx-controller -n ingress-nginx
         # kubectl get events -n ingress-nginx --sort-by=.metadata.creationTimestamp
