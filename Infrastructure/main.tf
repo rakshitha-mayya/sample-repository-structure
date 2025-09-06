@@ -6,7 +6,7 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name   = "azurerm_resource_group.aks_rg.name"
+    resource_group_name   = azurerm_resource_group.aks_rg.name
     storage_account_name  = "petffile"
     container_name        = "terraformtffile"
     key = "bG4CKP7YvUbLBn/h2X7NXcasGcYiZRCmslLd/QxUY19rErfUB9jo2rUrnZQyNyJu7+4QydXD0OoC+AStBy9FaA=="
