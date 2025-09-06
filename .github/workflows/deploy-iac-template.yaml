@@ -75,8 +75,8 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve -input=false
 
-    - name: Terraform Destroy
-      run: terraform destroy -auto-approve -input=false
+    # - name: Terraform Destroy
+    #   run: terraform destroy -auto-approve -input=false
 
     # - name: Get Terraform Outputs
     #   if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event.inputs.action == 'apply'
