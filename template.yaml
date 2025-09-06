@@ -47,10 +47,10 @@ spec:
             - East US
             - West US 2
             - West Europe
-        resource_group:
-          title: Resource Group
-          type: string
-          description: Name of the Azure Resource Group
+        # resource_group:
+        #   title: Resource Group
+        #   type: string
+        #   description: Name of the Azure Resource Group
         # node_count:
         #   title: Node Count
         #   type: integer
