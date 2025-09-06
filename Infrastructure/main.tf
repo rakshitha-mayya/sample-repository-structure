@@ -17,16 +17,17 @@ provider "azurerm" {
 }
 
 # Primary Resource Group (already owned by you)
-data "azurerm_resource_group" "aks_rg" {
+resource "azurerm_resource_group" "aks_rg" {
   name = var.resource_group_name
+  location = "East US"
 }
 
 
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.aks_cluster_name
-  location            = data.azurerm_resource_group.aks_rg.location
-  resource_group_name = data.azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
   dns_prefix          = "az-pe-cluster"
 
   default_node_pool {
@@ -74,8 +75,8 @@ output "kube_config" {
 # Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "aks_logs" {
   name                = "${var.aks_cluster_name}-logs"
-  location            = data.azurerm_resource_group.aks_rg.location
-  resource_group_name = data.azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
@@ -87,8 +88,8 @@ data "azurerm_client_config" "current" {}
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
   name                  = "pe-grafana"
-  resource_group_name   = data.azurerm_resource_group.aks_rg.name
-  location              = data.azurerm_resource_group.aks_rg.location
+  resource_group_name   = azurerm_resource_group.aks_rg.name
+  location              = azurerm_resource_group.aks_rg.location
   sku                   = "Standard"
   grafana_major_version = 11
 
@@ -107,8 +108,8 @@ resource "azurerm_role_assignment" "grafana_admin" {
 # # ACR
 resource "azurerm_container_registry" "aks_acr" {
   name                = replace("${var.aks_cluster_name}acr", "-", "")
-  resource_group_name = data.azurerm_resource_group.aks_rg.name
-  location            = data.azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  location            = azurerm_resource_group.aks_rg.location
   sku                 = "Standard"
   admin_enabled       = true
 
@@ -132,8 +133,8 @@ resource "azurerm_role_assignment" "user_acr_push" {
 # Key Vault
 resource "azurerm_key_vault" "aks_kv" {
   name                        = replace("pe-aks${var.aks_cluster_name}", "-", "")
-  location                    = data.azurerm_resource_group.aks_rg.location
-  resource_group_name         = data.azurerm_resource_group.aks_rg.name
+  location                    = azurerm_resource_group.aks_rg.location
+  resource_group_name         = azurerm_resource_group.aks_rg.name
   tenant_id                   = var.tenantid
   sku_name                    = "standard"
   enable_rbac_authorization   = true
@@ -155,4 +156,61 @@ resource "azurerm_role_assignment" "kv_secrets_user" {
   scope                = azurerm_key_vault.aks_kv.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+}
+
+# Public IP for the Load Balancer
+resource "azurerm_public_ip" "alb_pip" {
+  name                = "${var.aks_cluster_name}-alb-pip"
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  sku                 = "Standard"
+  allocation_method   = "Static"
+
+  tags = var.default_tags
+}
+
+# Azure Load Balancer (Public)
+resource "azurerm_lb" "alb" {
+  name                = var.alb_name
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+  sku                 = "Standard"
+
+  frontend_ip_configuration {
+    name                 = var.alb_frontend_name
+    public_ip_address_id = azurerm_public_ip.alb_pip.id
+  }
+
+  tags = var.default_tags
+}
+
+# Backend Pool
+resource "azurerm_lb_backend_address_pool" "alb_backend" {
+  name            = var.alb_backend_pool_name
+  loadbalancer_id = azurerm_lb.alb.id
+}
+
+# Health Probe (TCP or HTTP)
+resource "azurerm_lb_probe" "alb_probe" {
+  name                 = "${var.alb_name}-probe"
+  loadbalancer_id      = azurerm_lb.alb.id
+  protocol             = var.alb_probe_protocol            # "Tcp" or "Http"
+  port                 = var.alb_probe_port
+  request_path         = var.alb_probe_protocol == "Http" ? var.alb_probe_request_path : null
+  interval_in_seconds  = 5
+  number_of_probes     = 2
+}
+
+# Load Balancing Rule (e.g., 80->80)
+resource "azurerm_lb_rule" "alb_rule" {
+  name                           = "${var.alb_name}-rule"
+  loadbalancer_id                = azurerm_lb.alb.id
+  protocol                       = var.alb_rule_protocol     # "Tcp" or "Udp"
+  frontend_port                  = var.alb_rule_frontend_port
+  backend_port                   = var.alb_rule_backend_port
+  frontend_ip_configuration_name = var.alb_frontend_name
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.alb_backend.id]
+  probe_id                       = azurerm_lb_probe.alb_probe.id
+  idle_timeout_in_minutes        = 4
+  disable_outbound_snat          = false
 }
