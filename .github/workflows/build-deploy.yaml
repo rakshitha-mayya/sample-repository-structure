@@ -6,32 +6,81 @@ on:
       - main
 
 jobs:
-  Image-build-and-push:
+  Image-build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Check out the repo
       uses: actions/checkout@v3
 
-    - name: Log in to ACR
-      uses: docker/login-action@v2
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        registry: ${{ secrets.ACR_LOGIN_SERVER }}
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+        creds: |
+          {
+              "clientId": "de070d2e-ab18-41c5-bfa6-7cfb61136711",
+              "clientSecret": "h.l8Q~npXw6iK42Bi1aQwzadnX.mdYERr~yYhcm4",
+              "subscriptionId": "343c17eb-34b6-4481-92a2-a0a5a04bdd88",
+              "tenantId": "99d624b9-55f3-4984-bb9a-28d58385162d",
+              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+              "resourceManagerEndpointUrl": "https://management.azure.com/",
+              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+              "galleryEndpointUrl": "https://gallery.azure.com/",
+              "managementEndpointUrl": "https://management.core.windows.net/"
+            }
+    # - name: Docker login
+    #   run: az acr login --name azpeclusteracr
 
-    - name: Build Docker image
+    # - name: Build Docker image
+    #   run: |
+    #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+    #     echo ${CURRENT_TAG}
+    #     cd $PWD/application/node-k8s-app
+    #     docker build -t azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG} .
+    #     docker push azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG}
+    - name: Install kubectl & kubelogin
+      run: |
+        az aks install-cli
+        
+    - name: Deploy
       run: |
         CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
         echo ${CURRENT_TAG}
-        cd $PWD/application/node-k8s-app
-        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/nodejs-app:${CURRENT_TAG} .
-        docker push ${{ secrets.ACR_LOGIN_SERVER }}/nodejs-app:${CURRENT_TAG}
-      
+        cd helmcharts
+        az aks get-credentials --resource-group rg-cp-pe-pattern-poc4 --name az-pe-cluster --overwrite-existing --admin
+        # helm upgrade --install nodejs-app . -f values.yaml --set image.tag=${CURRENT_TAG} --debug
+        # kubectl get pod
+        # kubectl get svc 
+        # kubectl get event
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+        helm repo update
+
+        helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace
+        # kubectl get pods -n ingress-nginx
+        # kubectl describe svc ingress-nginx-controller -n ingress-nginx
+        # kubectl get events -n ingress-nginx --sort-by=.metadata.creationTimestamp
+    # - name: Get LoadBalancer External IP
+    #   run: |
+    #     IP=""
+    #     for i in {1..20}; do
+    #       IP=$(kubectl get svc nodejs-app -n default -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    #       if [ -z "$IP" ]; then
+    #         echo "Waiting for external IP..."
+    #         sleep 15
+    #       else
+    #         break
+    #       fi
+    #     done
+    #     echo "External IP: $IP"
+    #     echo "LOADBALANCER_IP=$IP" >> $GITHUB_ENV
+    
+    # - name: Show External IP
+    #   run: echo "Your app is available at http://${{ env.LOADBALANCER_IP }}"
 
     # - name: Build and push Docker image
     #   run: |
     #     cd $PWD/node-k8s-app
-    #     docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:latest .
+    #     docker build -f Dockerfile -t /node-k8s-app:latest .
     
     # - name: Run Trivy vulnerability scanner
     #   uses: aquasecurity/trivy-action@0.28.0
@@ -57,26 +106,26 @@ jobs:
     #     CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
     #     echo ${CURRENT_TAG}
     #     cd $PWD/application/node-k8s-app
-    #     docker build -f Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} .
-    #     echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        # docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG}
-        # echo "${{ secrets.DOCKERHUB_USERNAME }}/node-k8s-app:${CURRENT_TAG} is pushed"
+    #     docker build -f Dockerfile -t /node-k8s-app:${CURRENT_TAG} .
+    #     echo "" | docker login -u "" --password-stdin
+        # docker push /node-k8s-app:${CURRENT_TAG}
+        # echo "/node-k8s-app:${CURRENT_TAG} is pushed"
 
-  kubeconform:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # kubeconform:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Install kubeconform
-        run: |
-          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
-          sudo mv kubeconform /usr/local/bin/
+  #     - name: Install kubeconform
+  #       run: |
+  #         curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+  #         sudo mv kubeconform /usr/local/bin/
 
-      - name: Validate manifests
-        run: |
-          kubeconform -strict -summary -output json $(find . -name '*.yaml')
-        continue-on-error: true
+      # - name: Validate manifests
+      #   run: |
+      #     kubeconform -strict -summary -output json $(find . -name '*.yaml')
+      #   continue-on-error: true
           
   # Deploy:
   #   runs-on: self-hosted
