@@ -4,6 +4,14 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "=4.41.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.20"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.11"
+    }
   }
   backend "azurerm" {
     resource_group_name   = "rg-tfstate"
