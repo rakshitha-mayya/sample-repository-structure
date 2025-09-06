@@ -45,6 +45,13 @@ jobs:
               "managementEndpointUrl": "https://management.core.windows.net/"
             }
 
+    - name: Set Terraform environment variables
+      run: |
+        echo "ARM_CLIENT_ID=657f814b-9667-4e5a-a3d4-3f264ff38bb4" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=05276564-4a5f-40d6-b156-3ed5768e3bf3" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=8196ddea-f6c5-4044-8209-53ad1fdaebb" >> $GITHUB_ENV
+
     - name: Terraform fmt
       id: fmt
       run: terraform fmt -check
@@ -72,11 +79,11 @@ jobs:
       if: steps.plan.outcome == 'failure'
       run: exit 1
 
-    # - name: Terraform Apply
-    #   run: terraform apply -auto-approve -input=false
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -input=false
 
-    - name: Terraform Destroy
-      run: terraform destroy -auto-approve -input=false
+    # - name: Terraform Destroy
+    #   run: terraform destroy -auto-approve -input=false
 
     # - name: Get Terraform Outputs
     #   if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event.inputs.action == 'apply'
