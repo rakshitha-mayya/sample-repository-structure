@@ -56,18 +56,7 @@ spec:
         #   type: integer
         #   description: Number of nodes in the AKS cluster
         #   default: 3
-    - title: Repository Information
-      required:
-        - repoUrl
-      properties:
-        repoUrl:
-          title: Repository Location
-          type: string
-          ui:field: RepoUrlPicker
-          ui:options:
-            allowedHosts:
-              - github.com
-              - github.kyndryl.net
+  # Repository Information removed; repoUrl is now hardcoded
   steps:
     - id: fetch
       name: Fetch Skeleton
@@ -80,23 +69,16 @@ spec:
           azure_region: ${{ parameters.azure_region }}
           resource_group: ${{ parameters.resource_group }}
           node_count: ${{ parameters.node_count }}
-          repoUrl: ${{ parameters.repoUrl }}
-    - id: publish
-      name: Publish
-      action: publish:github
-      input:
-        description: AKS cluster deployment for ${{ parameters.clusterName }}
-        repoUrl: ${{ parameters.repoUrl }}
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        repoContentsUrl: 'https://github.com/rakshitha-mayya/sample-repository-structure'
         catalogInfoPath: '/catalog-info.yaml'
   output:
     links:
       - title: Repository
-        url: ${{ steps.publish.output.remoteUrl }}
+        url: 'https://github.com/rakshitha-mayya/sample-repository-structure'
       - title: Open in catalog
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
