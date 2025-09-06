@@ -72,7 +72,9 @@ jobs:
 
     - name: Terraform Plan
       id: plan
-      run: terraform plan -no-color -input=false
+      run: |
+        cd $PWD/Infrastructure
+        terraform plan -no-color -input=false
       continue-on-error: true
 
     - name: Terraform Plan Status
@@ -80,7 +82,9 @@ jobs:
       run: exit 1
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve -input=false
+      run: |
+        cd $PWD/Infrastructure
+        terraform apply -auto-approve -input=false
 
     - name: Azure Login
       uses: azure/login@v1
