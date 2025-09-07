@@ -134,4 +134,4 @@ variable "enable_alb_outbound_rule" {
   type        = bool
   default     = false
 }
-*/
+
