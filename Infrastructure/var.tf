@@ -134,4 +134,15 @@ variable "enable_alb_outbound_rule" {
   type        = bool
   default     = false
 }
+variable "argocd_namespace" {
+  description = "Namespace to deploy ArgoCD"
+  type        = string
+  default     = "argocd"
+}
+
+variable "argocd_chart_version" {
+  description = "Helm chart version for ArgoCD"
+  type        = string
+  default     = "5.40.0"
+}
 
