@@ -4,5 +4,5 @@ image:
   repository: azpeclusteracrpe.azurecr.io/nodejs-app
   tag: d388e9b
 service:
-  type: LoadBalancer
+  type: NodePort
   port: 3000
