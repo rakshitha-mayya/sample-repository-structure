@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kjchandan/Sample-cluster-new.git
+    repoURL: https://github.com/rakshitha-mayya/sample-repository-structure.git
     path: helmcharts
     targetRevision: main
     helm:
@@ -14,6 +14,6 @@ spec:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: test
+    namespace: default
   syncPolicy:
     automated: {}
