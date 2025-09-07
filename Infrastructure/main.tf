@@ -234,7 +234,7 @@ resource "azurerm_lb_rule" "alb_rule" {
 # ------------------------------------------
 # ArgoCD Deployment
 # ------------------------------------------
-/*
+
 provider "kubernetes" {
   alias                  = "aks"
   host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host
@@ -330,4 +330,4 @@ output "argocd_namespace" {
 output "argocd_server_external_ip" {
   description = "External IP of ArgoCD LoadBalancer service"
   value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
-}*/
+}
