@@ -106,7 +106,6 @@ resource "azurerm_log_analytics_workspace" "aks_logs" {
 
 
 # Current user info
-data "azurerm_client_config" "current" {}
 
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
