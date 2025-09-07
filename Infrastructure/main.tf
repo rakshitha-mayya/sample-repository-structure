@@ -51,6 +51,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
     node_count = var.node_count
     vm_size    = var.node_vm_size
   }
+  lifecycle {
+  ignore_changes = [
+    kube_config
+  ]
+}
 
   # Use the same RG for nodes (avoid subscription-level permission issues)
   node_resource_group = "mc-resource-group-pe"
@@ -237,10 +242,10 @@ resource "azurerm_lb_rule" "alb_rule" {
 
 provider "kubernetes" {
   alias                  = "aks"
-  host                   = try(azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null)
-  client_certificate     = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null)
-  client_key             = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null)
-  cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null)
+  host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null
+  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null
   load_config_file       = false
 }
 
@@ -251,10 +256,10 @@ provider "kubernetes" {
 provider "helm" {
   alias = "aks"
   kubernetes {
-    host                   = try(azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null)
-    client_certificate     = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null)
-    client_key             = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null)
-    cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null)
+    host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null
+    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null
   }
 }
 # ------------------------------------------
