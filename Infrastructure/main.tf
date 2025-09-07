@@ -82,11 +82,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
-# Output kubeconfig
+/*# Output kubeconfig
 output "kube_config" {
   value     = azurerm_kubernetes_cluster.aks.kube_config_raw
   sensitive = true
-}
+}*/
 
 # Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "aks_logs" {
