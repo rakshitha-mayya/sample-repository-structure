@@ -236,7 +236,7 @@ resource "azurerm_lb_rule" "alb_rule" {
 # ------------------------------------------
 
 provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host
+  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
   client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate)
   client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate)
@@ -261,7 +261,6 @@ resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
   }
-  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 # ------------------------------------------
@@ -280,9 +279,8 @@ server:
     type: LoadBalancer
 EOF
   ]
-  depends_on = [kubernetes_namespace.argocd]
 }
-/*data "kubernetes_service" "argocd_server" {
+data "kubernetes_service" "argocd_server" {
   metadata {
     name      = "argocd-server"
     namespace = kubernetes_namespace.argocd.metadata[0].name
@@ -291,7 +289,7 @@ EOF
   depends_on = [helm_release.argocd]
 }
 # Demo Application Deployment via ArgoCD
-resource "kubernetes_manifest" "argocd_demo_app" {
+/*resource "kubernetes_manifest" "argocd_demo_app" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -315,7 +313,7 @@ resource "kubernetes_manifest" "argocd_demo_app" {
       }
     }
   }
-}
+}*/
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
@@ -329,4 +327,4 @@ output "argocd_namespace" {
 output "argocd_server_external_ip" {
   description = "External IP of ArgoCD LoadBalancer service"
   value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
-}*/
+}
