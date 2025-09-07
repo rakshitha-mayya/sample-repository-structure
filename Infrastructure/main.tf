@@ -180,7 +180,7 @@ resource "azurerm_role_assignment" "kv_secrets_user" {
   principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
 }
 
-# Public IP for the Load Balancer
+/*# Public IP for the Load Balancer
 resource "azurerm_public_ip" "alb_pip" {
   name                = "${var.aks_cluster_name}-alb-pip"
   location            = azurerm_resource_group.aks_rg.location
@@ -240,7 +240,7 @@ resource "azurerm_lb_rule" "alb_rule" {
 resource "time_sleep" "wait_for_rbac" {
   depends_on = [azurerm_role_assignment.aks_cluster_admin]
   create_duration = "60s" # wait 1 minute
-}
+}*/
 # ----------------------------
 # Kubernetes Provider
 # ----------------------------
