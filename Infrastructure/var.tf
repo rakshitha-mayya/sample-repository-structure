@@ -145,4 +145,3 @@ variable "argocd_chart_version" {
   type        = string
   default     = "5.40.0"
 }
-
