@@ -236,11 +236,12 @@ resource "azurerm_lb_rule" "alb_rule" {
 # ------------------------------------------
 
 provider "kubernetes" {
-  host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate)
-  alias      = "aks"
+  alias                  = "aks"
+  host                   = try(azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null)
+  client_certificate     = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null)
+  client_key             = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null)
+  cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null)
+  load_config_file       = false
 }
 
 
@@ -248,16 +249,14 @@ provider "kubernetes" {
 # Helm Provider (for ArgoCD)
 # ------------------------------------------
 provider "helm" {
-  alias      = "aks"  
+  alias = "aks"
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.aks.kube_admin_config[0].host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate)
-    
+    host                   = try(azurerm_kubernetes_cluster.aks.kube_admin_config[0].host, null)
+    client_certificate     = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_certificate), null)
+    client_key             = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].client_key), null)
+    cluster_ca_certificate = try(base64decode(azurerm_kubernetes_cluster.aks.kube_admin_config[0].cluster_ca_certificate), null)
+  }
 }
-}
-
 # ------------------------------------------
 # ArgoCD Namespace
 # ------------------------------------------
