@@ -70,21 +70,25 @@ jobs:
         cd $PWD/Infrastructure
         terraform validate -no-color
 
-    - name: Terraform Plan
-      id: plan
-      run: |
-        cd $PWD/Infrastructure
-        terraform plan -no-color -input=false
-      continue-on-error: true
+    # - name: Terraform Plan
+    #   id: plan
+    #   run: |
+    #     cd $PWD/Infrastructure
+    #     terraform plan -no-color -input=false
+    #   continue-on-error: true
 
     # - name: Terraform Plan Status
     #   if: steps.plan.outcome == 'failure'
     #   run: exit 1
 
-    - name: Terraform Apply
+    # - name: Terraform Apply
+    #   run: |
+    #     cd $PWD/Infrastructure
+    #     terraform apply -auto-approve -input=false
+    - name: Terraform destroy
       run: |
         cd $PWD/Infrastructure
-        terraform apply -auto-approve -input=false
+        terraform destroy -auto-approve -input=false
 
     - name: Azure Login
       uses: azure/login@v1
