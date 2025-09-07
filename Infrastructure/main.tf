@@ -51,12 +51,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     node_count = var.node_count
     vm_size    = var.node_vm_size
   }
-  lifecycle {
-  ignore_changes = [
-    kube_config
-  ]
-}
-
+  
   # Use the same RG for nodes (avoid subscription-level permission issues)
   node_resource_group = "mc-resource-group-pe"
 
@@ -297,7 +292,7 @@ data "kubernetes_service" "argocd_server" {
   depends_on = [helm_release.argocd]
 }
 # Demo Application Deployment via ArgoCD
-/*resource "kubernetes_manifest" "argocd_demo_app" {
+resource "kubernetes_manifest" "argocd_demo_app" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -321,11 +316,11 @@ data "kubernetes_service" "argocd_server" {
       }
     }
   }
-}*/
+}
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
-/*output "argocd_release_name" {
+output "argocd_release_name" {
   value = helm_release.argocd.name
 }
 
