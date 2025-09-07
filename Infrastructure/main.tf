@@ -81,6 +81,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_plugin = "azure"
   }
 }
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_role_assignment" "aks_cluster_admin" {
+  scope                = azurerm_kubernetes_cluster.aks.id
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
 
 /*# Output kubeconfig
 output "kube_config" {
