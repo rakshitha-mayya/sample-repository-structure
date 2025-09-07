@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kjchandan/New-Sample-Cluster.git
+    repoURL: https://github.com/kjchandan/New-Sample-Cluster1.git
     path: helmcharts
     targetRevision: main
     helm:
