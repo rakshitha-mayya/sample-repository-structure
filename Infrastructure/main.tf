@@ -325,7 +325,7 @@ data "kubernetes_service" "argocd_server" {
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
-output "argocd_release_name" {
+/*output "argocd_release_name" {
   value = helm_release.argocd.name
 }
 
