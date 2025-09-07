@@ -66,7 +66,7 @@ variable "default_tags" {
     Owner       = "Pushpreet.Singh1@kyndryl.com"
   }
 }
-/*
+
 variable "alb_name" {
   description = "Name of the public Azure Load Balancer"
   type        = string
