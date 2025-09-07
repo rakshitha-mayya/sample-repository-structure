@@ -291,7 +291,7 @@ data "kubernetes_service" "argocd_server" {
 
   depends_on = [helm_release.argocd]
 }
-# Demo Application Deployment via ArgoCD
+/*# Demo Application Deployment via ArgoCD
 resource "kubernetes_manifest" "argocd_demo_app" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
@@ -316,7 +316,7 @@ resource "kubernetes_manifest" "argocd_demo_app" {
       }
     }
   }
-}
+}*/
 # ------------------------------------------
 # Outputs
 # ------------------------------------------
