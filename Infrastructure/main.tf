@@ -231,103 +231,81 @@ resource "azurerm_lb_rule" "alb_rule" {
   disable_outbound_snat          = false
 }
 
-# ------------------------------------------
-# ArgoCD Deployment
-# ------------------------------------------
-
+# ----------------------------
+# Kubernetes Provider
+# ----------------------------
 provider "kubernetes" {
-  alias                  = "aks"
   host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
   client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
   client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+  load_config_file       = false
 }
 
+# ----------------------------
+# Namespace for ArgoCD
+# ----------------------------
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    name = var.argocd_namespace
+  }
 
-# ------------------------------------------
-# Helm Provider (for ArgoCD)
-# ------------------------------------------
+  depends_on = [
+    azurerm_kubernetes_cluster.aks
+  ]
+}
+
+# ----------------------------
+# Helm Provider
+# ----------------------------
 provider "helm" {
-  alias = "aks"
   kubernetes {
     host                   = azurerm_kubernetes_cluster.aks.kube_config[0].host
     client_certificate     = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_certificate)
     client_key             = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].client_key)
     cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.aks.kube_config[0].cluster_ca_certificate)
+    load_config_file       = false
   }
-}
-# ------------------------------------------
-# ArgoCD Namespace
-# ------------------------------------------
-resource "kubernetes_namespace" "argocd" {
-  metadata {
-    name = "argocd"
-  }
-  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
-# ------------------------------------------
-# ArgoCD Helm Release
-# ------------------------------------------
+# ----------------------------
+# Deploy ArgoCD via Helm
+# ----------------------------
 resource "helm_release" "argocd" {
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "6.7.7"
+  name             = "argocd"
+  chart            = "argo-cd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  namespace        = kubernetes_namespace.argocd.metadata[0].name
+  create_namespace = false
+  version          = var.argocd_chart_version
 
-  values = [<<EOF
+  values = [
+    <<EOF
 server:
   service:
     type: LoadBalancer
 EOF
   ]
-}
-data "kubernetes_service" "argocd_server" {
-  metadata {
-    name      = "argocd-server"
-    namespace = kubernetes_namespace.argocd.metadata[0].name
-  }
 
-  depends_on = [helm_release.argocd]
-}
-/*# Demo Application Deployment via ArgoCD
-resource "kubernetes_manifest" "argocd_demo_app" {
-  manifest = {
-    apiVersion = "argoproj.io/v1alpha1"
-    kind       = "Application"
-    metadata = {
-      name      = "node-js-app"
-      namespace = "argocd"
-    }
-    spec = {
-      project = "default"
-      source = {
-        repoURL = "https://github.com/kjchandan/sample-cluster"
-        targetRevision = "main"
-        path = "helmcharts"
-      }
-      destination = {
-        server    = "https://kubernetes.default.svc"
-        namespace = "default"
-      }
-      syncPolicy = {
-        automated = {}
-      }
-    }
-  }
-}*/
-# ------------------------------------------
-# Outputs
-# ------------------------------------------
-output "argocd_release_name" {
-  value = helm_release.argocd.name
+  depends_on = [
+    kubernetes_namespace.argocd
+  ]
 }
 
+output "aks_cluster_name" {
+  description = "AKS Cluster Name"
+  value       = azurerm_kubernetes_cluster.aks.name
+}
+output "kube_config" {
+  description = "Kubeconfig for the AKS cluster"
+  value       = azurerm_kubernetes_cluster.aks.kube_config_raw
+  sensitive   = true
+}
 output "argocd_namespace" {
-  value = kubernetes_namespace.argocd.metadata[0].name
+  description = "Namespace where ArgoCD is deployed"
+  value       = kubernetes_namespace.argocd.metadata[0].name
 }
-output "argocd_server_external_ip" {
-  description = "External IP of ArgoCD LoadBalancer service"
-  value       = data.kubernetes_service.argocd_server.status[0].load_balancer[0].ingress[0].ip
+output "argocd_server_service" {
+  description = "ArgoCD server LoadBalancer info"
+  value       = helm_release.argocd.status
 }
