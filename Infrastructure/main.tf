@@ -175,7 +175,7 @@ resource "azurerm_role_assignment" "kv_secrets_user" {
 }
 
 # Public IP for the Load Balancer
-/*resource "azurerm_public_ip" "alb_pip" {
+resource "azurerm_public_ip" "alb_pip" {
   name                = "${var.aks_cluster_name}-alb-pip"
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
@@ -230,7 +230,7 @@ resource "azurerm_lb_rule" "alb_rule" {
   idle_timeout_in_minutes        = 4
   disable_outbound_snat          = false
 }
-*/
+
 # ------------------------------------------
 # ArgoCD Deployment
 # ------------------------------------------
