@@ -13,14 +13,14 @@ terraform {
       version = "~> 2.11"
     }
   }
-  /*backend "azurerm" {
+  backend "azurerm" {
     resource_group_name   = "rg-tfstate"
     storage_account_name  = "petffile"
     container_name        = "gitops"
     key                   = "aks.terraform.tfstate"
     subscription_id       = "05276564-4a5f-40d6-b156-3ed5768e3bf3"
     tenant_id             = "8196ddea-f6c5-4044-8209-53ad1fdaebbf"
-}*/
+}
 }
 
 provider "azurerm" {
