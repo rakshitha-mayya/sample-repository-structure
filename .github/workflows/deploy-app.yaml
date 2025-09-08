@@ -37,8 +37,8 @@ jobs:
           CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
           echo ${CURRENT_TAG}
           cd $PWD/application/node-k8s-app
-          docker build -t azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG} .
-          docker push azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG}
+          docker build -t azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG} .
+          docker push azpeclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG}
 
       - name: Deploy ArgoCD Application
         run: |
