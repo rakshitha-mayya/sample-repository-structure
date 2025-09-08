@@ -42,7 +42,7 @@ jobs:
 
       - name: Deploy ArgoCD Application
         run: |
-          cd helmcharts
+          # cd helmcharts
           az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
           export IMAGE_TAG=$(echo $(git rev-parse --short HEAD))
 
