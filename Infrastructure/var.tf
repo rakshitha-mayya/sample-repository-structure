@@ -2,28 +2,28 @@ variable "clientid" {
   description = "client id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "657f814b-9667-4e5a-a3d4-3f264ff38bb4"
+  default = "ee06da01-52ef-42c9-8665-03fd349d4fc9"
 }
-
+ 
 variable "tenantid" {
   description = "tenant id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "8196ddea-f6c5-4044-8209-53ad1fdaebbf"
+  default = "c3c8c18c-2d1f-4023-bb9c-11a8b40799f0"
 }
-
+ 
 variable "secretvalue" {
   description = "secretvalue id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG"
+  default = "Vgx8Q~88RhqDiEUdTSuTqBoMprucBN-_jVwaRbRt"
 }
-
+ 
 variable "subscriptionid" {
   description = "secretvalue id azure"
   type        = string #map list of string
   #in string variable we can define only one single value
-  default = "05276564-4a5f-40d6-b156-3ed5768e3bf3"
+  default = "1fe9d6c6-7bd9-49ef-9ee9-04c91c284767"
 }
 
 variable "resource_group_name" {
