@@ -88,4 +88,8 @@ jobs:
       if: inputs.action == 'destroy'
       run: |
         cd $PWD/Infrastructure
-        terraform destroy -auto-approve -input=false
+        # terraform destroy -auto-approve -input=false
+        az storage blob delete \
+          --account-name tfstateacct123456 \
+          --container-name tfstate \
+          --name terraform.tfstate
