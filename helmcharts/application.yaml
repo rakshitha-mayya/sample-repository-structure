@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kjchandan/Cluster-Sample-new-1.git
+    repoURL: https://github.com/rakshitha-mayya/sample-repository-structure.git
     path: helmcharts
-    targetRevision: main
+    targetRevision: pe-pattern-2
     helm:
       valueFiles:
         - values.yaml
