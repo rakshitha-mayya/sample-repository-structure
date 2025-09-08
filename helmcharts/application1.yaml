@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nodejs-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rakshitha-mayya/sample-repository-structure.git
+    path: helmcharts
+    targetRevision: main
+    helm:
+      valueFiles:
+        - values.generated.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated: {}
