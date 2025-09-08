@@ -14,12 +14,12 @@ terraform {
     }
   }
   backend "azurerm" {
-    resource_group_name   = "rg-tfstate"
-    storage_account_name  = "petffile"
-    container_name        = "gitops"
-    key                   = "aks.terraform.tfstate"
-    subscription_id       = "05276564-4a5f-40d6-b156-3ed5768e3bf3"
-    tenant_id             = "8196ddea-f6c5-4044-8209-53ad1fdaebbf"
+    resource_group_name  = "rg-terraform-backend"    # RG for storage
+    storage_account_name = "tfstateacct123456"        # Your unique storage account
+    container_name       = "tfstate"                # Blob container
+    key                  = "terraform.tfstate"
+    subscription_id       = "1fe9d6c6-7bd9-49ef-9ee9-04c91c284767"
+    tenant_id             = "c3c8c18c-2d1f-4023-bb9c-11a8b40799f0"
 }
 }
 
