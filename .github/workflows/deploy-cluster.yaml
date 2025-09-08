@@ -1,0 +1,91 @@
+name: Deploy AKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      aks_cluster_name:
+        description: "Enter AKS Cluster Name"
+        required: true
+        default: "az-pe-cluster"
+      resource_group_name:
+        description: "Enter the Azure Resource Group Name"
+        required: true
+        default: "az-pe-cluster"
+      action:
+        description: "action"
+        required: true
+        default: "plan"
+        type: choice
+        options:
+          - "plan"
+          - "apply"
+          - "destroy"
+            
+env:
+  TF_VERSION: 1.5.0
+  
+jobs:
+  terraform:
+    permissions: write-all
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        # working-directory: Infrastructure
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
+    - name: Set Terraform environment variables
+      run: |
+        echo "ARM_CLIENT_ID=657f814b-9667-4e5a-a3d4-3f264ff38bb4" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=05276564-4a5f-40d6-b156-3ed5768e3bf3" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=8196ddea-f6c5-4044-8209-53ad1fdaebb" >> $GITHUB_ENV
+
+    - name: Terraform Init
+      id: init
+      run: |
+        echo "$PWD"
+        cd $PWD/Infrastructure
+        terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: |
+        cd $PWD/Infrastructure
+        terraform validate -no-color
+
+    - name: Terraform Plan
+      if: inputs.action == 'plan'
+      id: plan
+      run: |
+        cd $PWD/Infrastructure
+        # terraform plan -no-color -input=false
+        terraform plan \
+          -input=false \
+          -var="resource_group_name=${{ github.event.inputs.resource_group_name }}" \
+          -var="aks_cluster_name=${{ github.event.inputs.aks_cluster_name }}"
+  
+    - name: Terraform Apply
+      if: inputs.action == 'apply'
+      run: |
+        cd $PWD/Infrastructure
+        terraform apply -auto-approve \
+          -input=false \
+          -var="resource_group_name=${{ github.event.inputs.resource_group_name }}" \
+          -var="aks_cluster_name=${{ github.event.inputs.aks_cluster_name }}"
+        
+    - name: Terraform destroy
+      if: inputs.action == 'destroy'
+      run: |
+        cd $PWD/Infrastructure
+        terraform destroy -auto-approve -input=false
