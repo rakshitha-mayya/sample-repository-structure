@@ -53,7 +53,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
   
   # Use the same RG for nodes (avoid subscription-level permission issues)
-  node_resource_group = "mc-resource-group-pe"
+  node_resource_group = "mc-resource-group-pe-2"
 
   tags = {
     Department  = "delivery"
@@ -109,7 +109,7 @@ resource "azurerm_log_analytics_workspace" "aks_logs" {
 
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
-  name                  = "pe-grafana-new"
+  name                  = "pe-grafana-new-2"
   resource_group_name   = azurerm_resource_group.aks_rg.name
   location              = azurerm_resource_group.aks_rg.location
   sku                   = "Standard"
