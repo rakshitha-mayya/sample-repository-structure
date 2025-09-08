@@ -129,7 +129,7 @@ resource "azurerm_role_assignment" "grafana_admin" {
 
 # # ACR
 resource "azurerm_container_registry" "aks_acr" {
-  name                = replace("${var.aks_cluster_name}acrpe", "-", "")
+  name                = replace("${var.aks_cluster_name}acr", "-", "")
   resource_group_name = azurerm_resource_group.aks_rg.name
   location            = azurerm_resource_group.aks_rg.location
   sku                 = "Standard"
