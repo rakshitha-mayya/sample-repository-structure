@@ -1,7 +1,7 @@
 name: nodejs-app
 replicaCount: 1
 image:
-  repository: azpeclusteracrpe.azurecr.io/nodejs-app
+  repository: gitopsaksclusteracr.azurecr.io/nodejs-app
   tag: b3b809c
 service:
   type: LoadBalancer
