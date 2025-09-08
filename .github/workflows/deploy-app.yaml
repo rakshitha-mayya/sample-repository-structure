@@ -39,26 +39,36 @@ jobs:
           cd $PWD/application/node-k8s-app
           docker build -t azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG} .
           docker push azpeclusteracrpe.azurecr.io/nodejs-app:${CURRENT_TAG}
-  
-      - name: update tag
-        run: | 
-          CURRENT_TAG=$(git rev-parse --short HEAD)
-          echo "Current tag: ${CURRENT_TAG}"
-          
-          cd helmcharts
-          sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
-  
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-  
-          git add values.yaml
-          git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
-          git push origin main
-  
-      - name: deploy
+
+      - name: Deploy ArgoCD Application
         run: |
-          cd helmcharts
-          az aks get-credentials --resource-group rg-cp-pe-pattern --name az-pe-cluster --overwrite-existing --admin
-          kubectl apply -f application.yaml -n argocd
+          export IMAGE_TAG=${{ github.event.inputs.image_tag }}
+
+          # Generate new values file
+          envsubst < helmcharts/values1.yaml > helmcharts/values.generated.yaml
+
+          # Replace repoURL and apply ArgoCD application manifest
+          envsubst < helmcharts/application1.yaml | kubectl apply -n argocd -f -
+  
+      # - name: update tag
+      #   run: | 
+      #     CURRENT_TAG=$(git rev-parse --short HEAD)
+      #     echo "Current tag: ${CURRENT_TAG}"
+          
+      #     cd helmcharts
+      #     sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+  
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "github-actions[bot]@users.noreply.github.com"
+  
+      #     git add values.yaml
+      #     git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
+      #     git push origin main
+  
+      # - name: deploy
+      #   run: |
+      #     cd helmcharts
+      #     az aks get-credentials --resource-group rg-cp-pe-pattern --name az-pe-cluster --overwrite-existing --admin
+      #     kubectl apply -f application.yaml -n argocd
           
         
