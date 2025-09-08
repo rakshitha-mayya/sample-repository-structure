@@ -46,10 +46,10 @@ jobs:
 
     - name: Set Terraform environment variables
       run: |
-        echo "ARM_CLIENT_ID=657f814b-9667-4e5a-a3d4-3f264ff38bb4" >> $GITHUB_ENV
-        echo "ARM_CLIENT_SECRET=7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG" >> $GITHUB_ENV
-        echo "ARM_SUBSCRIPTION_ID=05276564-4a5f-40d6-b156-3ed5768e3bf3" >> $GITHUB_ENV
-        echo "ARM_TENANT_ID=8196ddea-f6c5-4044-8209-53ad1fdaebb" >> $GITHUB_ENV
+        echo "ARM_CLIENT_ID=ee06da01-52ef-42c9-8665-03fd349d4fc9" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=Vgx8Q~88RhqDiEUdTSuTqBoMprucBN-_jVwaRbRt" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=1fe9d6c6-7bd9-49ef-9ee9-04c91c284767" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=c3c8c18c-2d1f-4023-bb9c-11a8b40799f0" >> $GITHUB_ENV
 
     - name: Terraform Init
       id: init
