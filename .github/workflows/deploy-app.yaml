@@ -30,7 +30,7 @@ jobs:
               }
               
       - name: Docker login
-        run: az acr login --name azpeclusteracrpe
+        run: az acr login --name gitopsaksclusteracr
   
       - name: Build Docker image
         run: |
@@ -42,7 +42,7 @@ jobs:
 
       - name: Deploy ArgoCD Application
         run: |
-          export IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          export IMAGE_TAG=$(echo $(git rev-parse --short HEAD))
 
           # Generate new values file
           envsubst < helmcharts/values1.yaml > helmcharts/values.generated.yaml
