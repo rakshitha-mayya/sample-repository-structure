@@ -109,7 +109,7 @@ resource "azurerm_log_analytics_workspace" "aks_logs" {
 
 # Grafana
 resource "azurerm_dashboard_grafana" "aks_grafana" {
-  name                  = "pe-grafana-new-2"
+  name                  = "gitops-grafana-new"
   resource_group_name   = azurerm_resource_group.aks_rg.name
   location              = azurerm_resource_group.aks_rg.location
   sku                   = "Standard"
@@ -129,7 +129,7 @@ resource "azurerm_role_assignment" "grafana_admin" {
 
 # # ACR
 resource "azurerm_container_registry" "aks_acr" {
-  name                = replace("${var.aks_cluster_name}acrpe", "-", "")
+  name                = replace("${var.aks_cluster_name}acr", "-", "")
   resource_group_name = azurerm_resource_group.aks_rg.name
   location            = azurerm_resource_group.aks_rg.location
   sku                 = "Standard"
@@ -154,7 +154,7 @@ resource "azurerm_role_assignment" "user_acr_push" {
 
 # Key Vault
 resource "azurerm_key_vault" "aks_kv" {
-  name                        = replace("pe-aks-new${var.aks_cluster_name}", "-", "")
+  name                        = replace("gitops-aks-new${var.aks_cluster_name}", "-", "")
   location                    = azurerm_resource_group.aks_rg.location
   resource_group_name         = azurerm_resource_group.aks_rg.name
   tenant_id                   = var.tenantid
