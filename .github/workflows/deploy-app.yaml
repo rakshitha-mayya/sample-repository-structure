@@ -2,9 +2,9 @@ name: Deploy application
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - pe-pattern-2
+  # push:
+  #   branches:
+  #     - pe-pattern-2
 jobs:
   Gitleaks:
     runs-on: ubuntu-latest
