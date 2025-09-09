@@ -49,14 +49,16 @@ jobs:
         with:
           scan-type: 'fs'
           ignore-unfixed: true
-          format: 'sarif'
+          format: 'table'
           severity: 'HIGH,CRITICAL'
-          output: 'trivy-results.sarif'
-
-      - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-results.sarif
+          output: 'trivy-results.txt'
+      
+      - name: Show Trivy results in summary
+        run: |
+          echo "## 🔍 Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat trivy-results.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           
 #   Image-build-and-deploy:
 #     needs: SonarQube-scan
