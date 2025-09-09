@@ -36,7 +36,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR comments
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
           
-  Trivy:
+  Trivy-Scan:
     needs: SonarQube-scan
     runs-on: ubuntu-latest
     permissions: write-all
@@ -61,7 +61,8 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           
   Image-build-and-deploy:
-    needs: SonarQube-scan
+    needs: Trivy-Scan
+    environment: pe-pattern
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
