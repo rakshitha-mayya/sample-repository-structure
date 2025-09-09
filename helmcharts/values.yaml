@@ -2,7 +2,7 @@ name: nodejs-app
 replicaCount: 1
 image:
   repository: gitopsaksclusteracr.azurecr.io/nodejs-app
-  tag: 4d1f917
+  tag: 5dc0f93
 service:
   type: LoadBalancer
   port: 3000
