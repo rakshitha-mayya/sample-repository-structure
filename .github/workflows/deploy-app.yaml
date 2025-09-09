@@ -2,6 +2,9 @@ name: Deploy application
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - pe-pattern-2
 jobs:
   Gitleaks:
     runs-on: ubuntu-latest
@@ -46,8 +49,14 @@ jobs:
         with:
           scan-type: 'fs'
           ignore-unfixed: true
-          format: 'table'
+          format: 'sarif'
           severity: 'HIGH,CRITICAL'
+          output: 'trivy-results.sarif'
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
           
 #   Image-build-and-deploy:
 #     needs: SonarQube-scan
