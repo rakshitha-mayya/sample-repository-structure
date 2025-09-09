@@ -33,75 +33,92 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR comments
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
           
-  Image-build-and-deploy:
+  Trivy:
     needs: SonarQube-scan
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-    - name: Check out the repo
-      uses: actions/checkout@v3
-      with:
-        persist-credentials: true 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Trivy vulnerability scanner (Filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          
+#   Image-build-and-deploy:
+#     needs: SonarQube-scan
+#     runs-on: ubuntu-latest
+#     permissions: write-all
+#     steps:
+#     - name: Check out the repo
+#       uses: actions/checkout@v3
+#       with:
+#         persist-credentials: true 
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: |
-          {
-              "clientId": "ee06da01-52ef-42c9-8665-03fd349d4fc9",
-              "clientSecret": "Vgx8Q~88RhqDiEUdTSuTqBoMprucBN-_jVwaRbRt",
-              "subscriptionId": "1fe9d6c6-7bd9-49ef-9ee9-04c91c284767",
-              "tenantId": "c3c8c18c-2d1f-4023-bb9c-11a8b40799f0",
-              "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-              "resourceManagerEndpointUrl": "https://management.azure.com/",
-              "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-              "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-              "galleryEndpointUrl": "https://gallery.azure.com/",
-              "managementEndpointUrl": "https://management.core.windows.net/"
-            }
+#     - name: Azure Login
+#       uses: azure/login@v1
+#       with:
+#         creds: |
+#           {
+#               "clientId": "ee06da01-52ef-42c9-8665-03fd349d4fc9",
+#               "clientSecret": "Vgx8Q~88RhqDiEUdTSuTqBoMprucBN-_jVwaRbRt",
+#               "subscriptionId": "1fe9d6c6-7bd9-49ef-9ee9-04c91c284767",
+#               "tenantId": "c3c8c18c-2d1f-4023-bb9c-11a8b40799f0",
+#               "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+#               "resourceManagerEndpointUrl": "https://management.azure.com/",
+#               "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+#               "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+#               "galleryEndpointUrl": "https://gallery.azure.com/",
+#               "managementEndpointUrl": "https://management.core.windows.net/"
+#             }
             
-    - name: Docker login
-      run: az acr login --name gitopsaksclusteracr
+#     - name: Docker login
+#       run: az acr login --name gitopsaksclusteracr
 
-    - name: Build Docker image
-      run: |
-        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
-        echo ${CURRENT_TAG}
-        cd $PWD/application/node-k8s-app
-        docker build -t gitopsaksclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG} .
-        docker push gitopsaksclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG}
+#     - name: Build Docker image
+#       run: |
+#         CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+#         echo ${CURRENT_TAG}
+#         cd $PWD/application/node-k8s-app
+#         docker build -t gitopsaksclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG} .
+#         docker push gitopsaksclusteracr.azurecr.io/nodejs-app:${CURRENT_TAG}
 
-    # - name: Deploy ArgoCD Application
-    #   run: |
-    #     # cd helmcharts
-    #     az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
-    #     export IMAGE_TAG=$(echo $(git rev-parse --short HEAD))
+#     # - name: Deploy ArgoCD Application
+#     #   run: |
+#     #     # cd helmcharts
+#     #     az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
+#     #     export IMAGE_TAG=$(echo $(git rev-parse --short HEAD))
 
-    #     # Generate new values file
-    #     envsubst < helmcharts/values1.yaml > helmcharts/values.generated.yaml
+#     #     # Generate new values file
+#     #     envsubst < helmcharts/values1.yaml > helmcharts/values.generated.yaml
 
-    #     # Replace repoURL and apply ArgoCD application manifest
-    #     envsubst < helmcharts/application1.yaml | kubectl apply -n argocd -f -
+#     #     # Replace repoURL and apply ArgoCD application manifest
+#     #     envsubst < helmcharts/application1.yaml | kubectl apply -n argocd -f -
 
-    - name: update tag
-      run: | 
-        CURRENT_TAG=$(git rev-parse --short HEAD)
-        echo "Current tag: ${CURRENT_TAG}"
+#     - name: update tag
+#       run: | 
+#         CURRENT_TAG=$(git rev-parse --short HEAD)
+#         echo "Current tag: ${CURRENT_TAG}"
         
-        cd helmcharts
-        sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+#         cd helmcharts
+#         sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
 
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+#         git config user.name "github-actions[bot]"
+#         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        git add values.yaml
-        git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
-        git push 
+#         git add values.yaml
+#         git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
+#         git push 
 
-    - name: deploy
-      run: |
-        cd helmcharts
-        az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
-        kubectl apply -f application.yaml -n argocd
+#     - name: deploy
+#       run: |
+#         cd helmcharts
+#         az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
+#         kubectl apply -f application.yaml -n argocd
         
       
+# # 
