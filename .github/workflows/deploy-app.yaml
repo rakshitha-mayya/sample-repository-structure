@@ -38,7 +38,6 @@ jobs:
 
       - name: Add SonarQube scan summary
         run: |
-          echo "## 📝 SonarQube Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "🔍 SonarQube Scan Results" >> $GITHUB_STEP_SUMMARY
           echo '<p align="center"><a href="https://sonarcloud.io/project/overview?id=rakshitha-mayya_sample-repository-structure">📊 View Full Report</a></p>' >> $GITHUB_STEP_SUMMARY
     
