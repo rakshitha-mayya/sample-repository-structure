@@ -34,7 +34,14 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR comments
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Show Sonar scan results in summary
+        run: |
+          echo "## 🔍 SonarQube Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo ' Report - https://sonarcloud.io/project/overview?id=rakshitha-mayya_sample-repository-structure '  >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           
   Trivy-Scan:
     needs: SonarQube-scan
