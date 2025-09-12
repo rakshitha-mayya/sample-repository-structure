@@ -280,51 +280,51 @@ pulumi.export("argocdServerExternal", argocd_host)
 # Surface the Argo CD Server LB endpoint (hostname or IP)
 
 # Optional: create an Argo CD Application to bootstrap workloads
-if argo_repo_url and argo_repo_path:
-    # Ensure CRDs from the chart are present before creating CRs
-    # Using depends_on=[argocd_chart] guarantees Applications are created after Helm finishes
-    app_spec = {
-        "project": argo_project_name,
-        "source": {
-            "repoURL": argo_repo_url,
-            "path": argo_repo_path,
-            "targetRevision": argo_repo_revision,
-            # If using Helm or Kustomize, add under "helm": {...} or "kustomize": {...}
-        },
-        "destination": {
-            "server": "https://kubernetes.default.svc",
-            "namespace": argo_app_namespace,
-        },
-        "syncPolicy": {
-            "automated": {"prune": True, "selfHeal": True} if argo_auto_sync else None,
-            "syncOptions": [
-                "CreateNamespace=true" if argo_create_ns else "CreateNamespace=false"
-            ],
-        },
-    }
+# if argo_repo_url and argo_repo_path:
+#     # Ensure CRDs from the chart are present before creating CRs
+#     # Using depends_on=[argocd_chart] guarantees Applications are created after Helm finishes
+#     app_spec = {
+#         "project": argo_project_name,
+#         "source": {
+#             "repoURL": argo_repo_url,
+#             "path": argo_repo_path,
+#             "targetRevision": argo_repo_revision,
+#             # If using Helm or Kustomize, add under "helm": {...} or "kustomize": {...}
+#         },
+#         "destination": {
+#             "server": "https://kubernetes.default.svc",
+#             "namespace": argo_app_namespace,
+#         },
+#         "syncPolicy": {
+#             "automated": {"prune": True, "selfHeal": True} if argo_auto_sync else None,
+#             "syncOptions": [
+#                 "CreateNamespace=true" if argo_create_ns else "CreateNamespace=false"
+#             ],
+#         },
+#     }
 
-    # Remove None-valued fields (CRD validation doesn’t like them)
-    def _strip_nones(obj):
-        if isinstance(obj, dict):
-            return {k: _strip_nones(v) for k, v in obj.items() if v is not None}
-        if isinstance(obj, list):
-            return [_strip_nones(v) for v in obj if v is not None]
-        return obj
+#     # Remove None-valued fields (CRD validation doesn’t like them)
+#     def _strip_nones(obj):
+#         if isinstance(obj, dict):
+#             return {k: _strip_nones(v) for k, v in obj.items() if v is not None}
+#         if isinstance(obj, list):
+#             return [_strip_nones(v) for v in obj if v is not None]
+#         return obj
 
-    app_spec = _strip_nones(app_spec)
+#     app_spec = _strip_nones(app_spec)
 
-    argo_app = k8s.apiextensions.CustomResource(
-        "argocd-bootstrap-app",
-        api_version="argoproj.io/v1alpha1",
-        kind="Application",
-        metadata={
-            "name": argo_app_name,
-            "namespace": argocd_namespace,
-            "finalizers": ["resources-finalizer.argocd.argoproj.io"],
-        },
-        spec=app_spec,
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[argocd_chart]),
-    )
+#     argo_app = k8s.apiextensions.CustomResource(
+#         "argocd-bootstrap-app",
+#         api_version="argoproj.io/v1alpha1",
+#         kind="Application",
+#         metadata={
+#             "name": argo_app_name,
+#             "namespace": argocd_namespace,
+#             "finalizers": ["resources-finalizer.argocd.argoproj.io"],
+#         },
+#         spec=app_spec,
+#         opts=ResourceOptions(provider=k8s_provider, depends_on=[argocd_chart]),
+#     )
 
 # Export the external endpoint
 pulumi.export("argocdNamespace", argocd_namespace)
