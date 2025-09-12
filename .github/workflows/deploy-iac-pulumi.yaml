@@ -1,0 +1,45 @@
+name: Pulumi Deployment
+
+on:
+  push:
+    branches:
+      - pe-pattern-pulumi   # Deploy on push to main branch
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # match your Pulumi project
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Infrastructure/pulumi/requirements.txt
+
+      - name: Set up Pulumi CLI
+        uses: pulumi/actions@v5
+        with:
+          pulumi-version: latest
+
+      # - name: Login to Pulumi
+      #   run: pulumi login
+      #   env:
+      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+      # - name: Select stack
+      #   run: pulumi stack select dev --cwd Infrastructure/pulumi
+
+      # - name: Pulumi up
+      #   run: pulumi up --yes --cwd Infrastructure/pulumi
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_DEFAULT_REGION: us-east-1

@@ -1,0 +1,82 @@
+name: aks-foundation
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: "AKS + ACR + Managed Grafana + Key Vault"
+config:
+  location:
+    description: "Azure region for all resources."
+    default: "East US"
+  resourceGroupName:
+    description: "Resource Group for control-plane resources."
+  aksClusterName:
+    description: "AKS cluster name."
+  dnsPrefix:
+    description: "DNS prefix for AKS API."
+    default: "az-pulumi-cluster"
+  nodeCount:
+    description: "System node pool size."
+    default: 1
+  nodeVmSize:
+    description: "VM size for nodes."
+    default: "Standard_DS2_v2"
+  nodeResourceGroup:
+    description: "Node resource group name created/used by AKS."
+    default: "mc-resource-group-pulumi"
+  kubernetesVersion:
+    description: "Kubernetes version for AKS (optional)."
+  tenantId:
+    description: "Azure AD tenant ID used for AAD/RBAC integration."
+  subscriptionId:
+    description: "Azure subscription ID (optional; usually taken from CLI)."
+  department:
+    description: "Tag: Department."
+    default: "delivery"
+  owner:
+    description: "Tag: Owner email."
+    default: "example@kyndryl.com"
+  defaultTags:
+    description: "Additional tags map (YAML object)."
+  grafanaName:
+    description: "Azure Managed Grafana name."
+    default: "pulumi-grafana-new"
+  keyVaultName:
+    description: "Key Vault name (must be globally unique in Azure KV DNS)."
+  acrName:
+    description: "Container Registry name (globally unique, alphanumeric 5-50)."
+  argocdNamespace:
+    description: "Namespace for Argo CD."
+    default: "argocd"
+  argocdChartVersion:
+    description: "argo/argo-cd chart version (leave blank for latest)."
+    default: ""          # ← empty means use latest
+
+  # These are only needed if you want auto-bootstrap.
+  # With defaults, they become optional.
+  argoRepoUrl:
+    description: "Git repo URL for Argo CD app bootstrap (optional)."
+    default: ""
+  argoRepoPath:
+    description: "Path inside the repo (optional)."
+    default: ""
+  argoRepoRevision:
+    description: "Git revision; branch/tag/commit (optional)."
+    default: "HEAD"
+  argoAppName:
+    description: "Argo CD Application name (optional)."
+    default: "bootstrap"
+  argoAppNamespace:
+    description: "Destination namespace for your app (optional)."
+    default: ""          # empty → code will fall back to argocdNamespace
+  argoProjectName:
+    description: "Argo CD Project (optional)."
+    default: "default"
+  argoAutoSync:
+    description: "Enable automated sync (prune & self-heal)."
+    default: true
+  argoCreateNamespace:
+    description: "Let Argo create destination namespace."
+    default: true
+
+

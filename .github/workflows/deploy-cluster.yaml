@@ -72,7 +72,7 @@ jobs:
       id: init
       run: |
         echo "$PWD"
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform init
 
     - name: Terraform Validate
@@ -85,7 +85,7 @@ jobs:
       if: inputs.action == 'plan'
       id: plan
       run: |
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         # terraform plan -no-color -input=false
         terraform plan \
           -input=false \
@@ -95,7 +95,7 @@ jobs:
     - name: Terraform Apply
       if: inputs.action == 'apply'
       run: |
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform apply -auto-approve \
           -input=false \
           -var="resource_group_name=${{ github.event.inputs.resource_group_name }}" \
@@ -104,5 +104,5 @@ jobs:
     - name: Terraform destroy
       if: inputs.action == 'destroy'
       run: |
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform destroy -auto-approve -input=false
