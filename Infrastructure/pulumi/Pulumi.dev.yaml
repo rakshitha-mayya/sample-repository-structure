@@ -1,8 +1,8 @@
 config:
   aks-foundation:location: East US
   aks-foundation:resourceGroupName: pulumi-rg
-  aks-foundation:aksClusterName: pulami-aks-dev
-  aks-foundation:dnsPrefix: az-pulumi-cluster
+  aks-foundation:aksClusterName: pulumiaksdev
+  aks-foundation:dnsPrefix: pulumiaksdev
   aks-foundation:nodeCount: "1"
   aks-foundation:nodeVmSize: Standard_D2s_v3
   aks-foundation:nodeResourceGroup: mc-resource-group-pulumi
