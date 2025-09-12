@@ -114,7 +114,7 @@ if k8s_version:
 aks = azure.containerservice.ManagedCluster(
     "aks",  # Pulumi logical name (internal to Pulumi)
     resource_group_name=rg.name,
-    resource_name=aks_name,           # 👈 sets the actual Azure AKS name exactly
+    name=aks_name,           # 👈 sets the actual Azure AKS name exactly
     location=rg.location,
     dns_prefix=dns_prefix,
     agent_pool_profiles=[agent_pool],
