@@ -65,8 +65,8 @@ jobs:
       - name: Pulumi preview
         run: pulumi preview --cwd Infrastructure/pulumi
 
-      # - name: Pulumi up
-      #   run: pulumi up --yes --cwd Infrastructure/pulumi
+      - name: Pulumi up
+        run: pulumi up --yes --cwd Infrastructure/pulumi
 
       # - name: Pulumi down
       #   run: pulumi down --yes --cwd Infrastructure/pulumi
