@@ -103,7 +103,7 @@ mc_args = dict(
  
 # -------- AKS Cluster (CREATE THIS BEFORE referencing 'aks') --------
 aks = azure.containerservice.ManagedCluster(
-    "pulami-aks-dev",  # Pulumi logical name == Azure resource name
+    aks_name,  # Pulumi logical name == Azure resource name
     resource_group_name=rg.name,
     location=rg.location,
     dns_prefix=dns_prefix,
