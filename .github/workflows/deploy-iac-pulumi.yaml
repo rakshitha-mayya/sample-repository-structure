@@ -59,14 +59,17 @@ jobs:
 
       - name: Select stack
         run: |
-          pulumi stack select rakshitha-mayya/aks-foundation/dev --cwd Infrastructure/pulumi || pulumi stack init rakshitha-mayya/aks-foundation/dev --cwd Infrastructure/pulumi
+          pulumi stack select --cwd Infrastructure/pulumi || pulumi stack init --cwd Infrastructure/pulumi
           pulumi stack change-secrets-provider default --cwd Infrastructure/pulumi
 
       - name: Pulumi preview
         run: pulumi preview --cwd Infrastructure/pulumi
 
-      - name: Pulumi up
-        run: pulumi up --yes --cwd Infrastructure/pulumi
+      # - name: Pulumi up
+      #   run: pulumi up --yes --cwd Infrastructure/pulumi
+
+      - name: Pulumi down
+        run: pulumi down --yes --cwd Infrastructure/pulumi
 
       # - name: Pulumi up
       #   run: pulumi up --yes --cwd Infrastructure/pulumi
