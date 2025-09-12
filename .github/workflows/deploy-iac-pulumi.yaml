@@ -35,7 +35,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
 
       - name: Select stack
-        run: pulumi stack select dev --cwd Infrastructure/pulumi || pulumi stack init dev --cwd Infrastructure/pulumi
+        run: pulumi stack select dev --secrets-provider=service --cwd Infrastructure/pulumi || pulumi stack init dev --secrets-provider=service --cwd Infrastructure/pulumi
 
       - name: Pulumi preview
         run: pulumi preview --cwd Infrastructure/pulumi
