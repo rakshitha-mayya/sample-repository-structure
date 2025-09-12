@@ -14,6 +14,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set environment variables
+        run: |
+          echo "ARM_CLIENT_ID=657f814b-9667-4e5a-a3d4-3f264ff38bb4" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=05276564-4a5f-40d6-b156-3ed5768e3bf3" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=8196ddea-f6c5-4044-8209-53ad1fdaebb" >> $GITHUB_ENV
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
