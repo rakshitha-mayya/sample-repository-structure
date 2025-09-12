@@ -1,8 +1,8 @@
 config:
   aks-foundation:location: East US
   aks-foundation:resourceGroupName: pulumi-rg
-  aks-foundation:aksClusterName: pulumiaksdev
-  aks-foundation:dnsPrefix: pulumiaksdev
+  aks-foundation:aksClusterName: pulami-aks-dev
+  aks-foundation:dnsPrefix: az-pulumi-cluster
   aks-foundation:nodeCount: "1"
   aks-foundation:nodeVmSize: Standard_D2s_v3
   aks-foundation:nodeResourceGroup: mc-resource-group-pulumi
@@ -21,7 +21,7 @@ config:
   
   # Leave unset to let Azure select a supported AKS version for your region
   # aks-foundation:kubernetesVersion: "1.29.7"
-
+ 
   # Directory / Subscription (sub optional if using az CLI default)
   aks-foundation:tenantId: 8196ddea-f6c5-4044-8209-53ad1fdaebbf
   aks-foundation:subscriptionId: 05276564-4a5f-40d6-b156-3ed5768e3bf3
@@ -35,11 +35,7 @@ config:
   aks-foundation:acrName: pulumiacr12345
   aks-foundation:keyVaultName: pulumi-kv-dev-01
   aks-foundation:grafanaName: pulumi-grafana
-  aks-foundation:pulumi config set aks-foundation: kubernetesVersion 1.29.7
   azure:subscriptionId: 05276564-4a5f-40d6-b156-3ed5768e3bf3
   azure:tenantId: 8196ddea-f6c5-4044-8209-53ad1fdaebbf
   aks-foundation:kubernetesVersion: 1.33.1
 encryptionsalt: v1:J8v5Bb/cLgs=:v1:C2ojpsYOp2XiGBJP:nKIvqynHvGJ0Z0g795g2gmXqfSM3sA==
-
-backend:
-  url: azblob://stackfile?storage_account=pestackfile

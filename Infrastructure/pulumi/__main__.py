@@ -8,43 +8,43 @@ import pulumi_azuread as azuread
 import pulumi_azure as azclassic  
 from pulumi import runtime
 # classic used only for RBAC role assignments by name
-
+ 
 cfg = pulumi.Config()
 client_cfg = azuread.get_client_config()
-
+ 
 def none_if_empty(v):
     if v is None:
         return None
     v = str(v).strip()
     return v if v else None
-
+ 
 # -------- Config ("variables") --------
 location            = cfg.get("location") or "East US"
 resource_group_name = cfg.require("resourceGroupName")
 aks_name            = cfg.require("aksClusterName")
 dns_prefix          = cfg.get("dnsPrefix") or "az-pulumi-cluster"
-
+ 
 node_count          = int(cfg.get("nodeCount") or 1)
 node_vm_size        = cfg.get("nodeVmSize") or "Standard_DS2_v2"
 node_rg_name_cfg    = none_if_empty(cfg.get("nodeResourceGroup")) or "mc-resource-group-pulumi"
-
+ 
 k8s_version         = cfg.get("kubernetesVersion")
 tenant_id           = cfg.require("tenantId")
 subscription_id     = cfg.get("subscriptionId")
-
+ 
 department          = cfg.get("department") or "delivery"
 owner               = cfg.get("owner") or "example@kyndryl.com"
 extra_tags          = cfg.get_object("defaultTags") or {}
-
+ 
 acr_name            = cfg.require("acrName")
 kv_name             = cfg.require("keyVaultName")
 grafana_name        = (cfg.get("grafanaName") or "pulumi-grafana-new")  # keep <= 23 chars
-
+ 
 # Tags (lowercase to avoid case collisions)
 normalized_extra_tags = {str(k).lower(): v for k, v in (extra_tags or {}).items()}
 common_tags = {"department": department, "owner": owner}
 common_tags.update(normalized_extra_tags)
-
+ 
 # -------- Resource Group --------
 rg = azure.resources.ResourceGroup(
     "rg",
@@ -52,7 +52,7 @@ rg = azure.resources.ResourceGroup(
     location=location,                         # <-- use config instead of hardcoding
     tags=common_tags,
 )
-
+ 
 # -------- Log Analytics Workspace --------
 law = azure.operationalinsights.Workspace(
     "aks-logs",
@@ -63,7 +63,7 @@ law = azure.operationalinsights.Workspace(
     sku=azure.operationalinsights.WorkspaceSkuArgs(name="PerGB2018"),
     tags=common_tags,
 )
-
+ 
 # -------- AKS inputs --------
 agent_pool = azure.containerservice.ManagedClusterAgentPoolProfileArgs(
     name="systempool",                # must match ^[a-z][a-z0-9]{0,11}$
@@ -73,22 +73,22 @@ agent_pool = azure.containerservice.ManagedClusterAgentPoolProfileArgs(
     type="VirtualMachineScaleSets",
     os_type="Linux",
 )
-
+ 
 addon_profiles = {
     "omsagent": azure.containerservice.ManagedClusterAddonProfileArgs(
         enabled=True,
         config={"logAnalyticsWorkspaceResourceID": law.id},
     )
 }
-
+ 
 aad_profile = azure.containerservice.ManagedClusterAADProfileArgs(
     enable_azure_rbac=True,
     managed=True,
     tenant_id=tenant_id,
 )
-
+ 
 identity = azure.containerservice.ManagedClusterIdentityArgs(type="SystemAssigned")
-
+ 
 mc_args = dict(
     resource_group_name=rg.name,
     location=rg.location,
@@ -101,33 +101,24 @@ mc_args = dict(
     node_resource_group=node_rg_name_cfg,
     tags=common_tags,
 )
-if k8s_version:
-    mc_args["kubernetes_version"] = k8s_version
-
+ 
 # -------- AKS Cluster (CREATE THIS BEFORE referencing 'aks') --------
 aks = azure.containerservice.ManagedCluster(
-    aks_name,
-    **mc_args,
-
+    aks_name,  # Pulumi logical name == Azure resource name
+    resource_group_name=rg.name,
+    location=rg.location,
+    dns_prefix=dns_prefix,
+    agent_pool_profiles=[agent_pool],
+    addon_profiles=addon_profiles,
+    aad_profile=aad_profile,
+    enable_rbac=True,
+    identity=identity,
+    node_resource_group=node_rg_name_cfg,
+    tags=common_tags,
+    **({"kubernetes_version": k8s_version} if k8s_version else {}),
     opts=ResourceOptions(depends_on=[rg]),
 )
-
-# aks = azure.containerservice.ManagedCluster(
-#     aks_name,                    # 👈 this is the Azure AKS name (no suffix if you set it explicitly)
-#     resource_group_name=rg.name,
-#     location=rg.location,
-#     dns_prefix=dns_prefix,
-#     agent_pool_profiles=[agent_pool],
-#     addon_profiles=addon_profiles,
-#     aad_profile=aad_profile,
-#     enable_rbac=True,
-#     identity=identity,
-#     node_resource_group=node_rg_name_cfg,
-#     tags=common_tags,
-#     **({"kubernetes_version": k8s_version} if k8s_version else {}),
-#     opts=ResourceOptions(depends_on=[rg]),
-# )
-
+ 
 # -------- ACR --------
 acr = azure.containerregistry.Registry(
     "acr",
@@ -139,13 +130,13 @@ acr = azure.containerregistry.Registry(
     tags=common_tags,
     opts=ResourceOptions(depends_on=[rg]),
 )
-
+ 
 # -------- RBAC that needs AKS (place after AKS) --------
 # Allow AKS kubelet to pull from ACR
 kubelet_oid = aks.identity_profile.apply(
     lambda p: p.get("kubeletidentity").object_id if p and p.get("kubeletidentity") else None
 )
-
+ 
 acr_pull = azclassic.authorization.Assignment(
     "aks-acr-pull",
     scope=acr.id,
@@ -153,7 +144,7 @@ acr_pull = azclassic.authorization.Assignment(
     principal_id=kubelet_oid,
     opts=ResourceOptions(depends_on=[acr, aks]),
 )
-
+ 
 # Allow your user to push/pull from ACR
 acr_push_user = azclassic.authorization.Assignment(
     "user-acr-push",
@@ -161,7 +152,7 @@ acr_push_user = azclassic.authorization.Assignment(
     role_definition_name="AcrPush",
     principal_id=client_cfg.object_id,
 )
-
+ 
 # -------- Key Vault (RBAC) + roles --------
 kv = azure.keyvault.Vault(
     "kv",
@@ -178,21 +169,21 @@ kv = azure.keyvault.Vault(
     tags=common_tags,
     opts=ResourceOptions(depends_on=[rg]),
 )
-
+ 
 kv_admin_user = azclassic.authorization.Assignment(
     "kv-admin-user",
     scope=kv.id,
     role_definition_name="Key Vault Administrator",
     principal_id=client_cfg.object_id,
 )
-
+ 
 kv_secrets_user = azclassic.authorization.Assignment(
     "kv-secrets-user",
     scope=kv.id,
     role_definition_name="Key Vault Secrets User",
     principal_id=aks.identity.principal_id,
 )
-
+ 
 # -------- Managed Grafana + Admin --------
 mg = azure.dashboard.Grafana(
     "grafana",  # Pulumi logical name (can be anything)
@@ -204,26 +195,31 @@ mg = azure.dashboard.Grafana(
     tags=common_tags,
     opts=ResourceOptions(depends_on=[rg]),
 )
-
+ 
 grafana_admin = azclassic.authorization.Assignment(
     "grafana-admin",
     scope=mg.id,
     role_definition_name="Grafana Admin",
     principal_id=client_cfg.object_id,
 )
-
-# -------- Kubeconfig (AFTER AKS) --------
-admin_creds = azure.containerservice.list_managed_cluster_admin_credentials_output(
-    resource_group_name=rg.name,
-    resource_name=aks.name,
-)
-kubeconfig = admin_creds.kubeconfigs[0].value.apply(lambda enc: base64.b64decode(enc).decode())
-
+ 
+ 
+# -------- Kubeconfig (skip during preview) --------
+if runtime.is_dry_run():
+    kubeconfig = pulumi.Output.secret("pending (preview)")
+else:
+    admin_creds = azure.containerservice.list_managed_cluster_admin_credentials_output(
+        resource_group_name=rg.name,
+        resource_name=aks.name,
+    )
+    kubeconfig = admin_creds.kubeconfigs[0].value.apply(lambda enc: base64.b64decode(enc).decode())
+ 
+ 
 # ---------- Argo CD (Helm) + optional Application bootstrap ----------
 # Config knobs (all optional; sensible defaults below)
 argocd_namespace     = cfg.get("argocdNamespace") or "argocd"
 argocd_chart_version = none_if_empty(cfg.get("argocdChartVersion"))  # e.g., "7.7.5" (or None for latest)
-
+ 
 # Optional Git bootstrap (set these if you want to auto-create an Argo Application)
 argo_repo_url        = none_if_empty(cfg.get("argoRepoUrl"))         # e.g., "https://github.com/org/repo.git"
 argo_repo_path       = none_if_empty(cfg.get("argoRepoPath"))        # e.g., "envs/dev" or "apps"
@@ -233,17 +229,17 @@ argo_app_namespace   = none_if_empty(cfg.get("argoAppNamespace")) or argocd_name
 argo_project_name    = none_if_empty(cfg.get("argoProjectName")) or "default"
 argo_auto_sync       = cfg.get_bool("argoAutoSync") or True
 argo_create_ns       = cfg.get_bool("argoCreateNamespace") or True
-
+ 
 # Kubernetes provider for this AKS cluster
 k8s_provider = k8s.Provider("k8s-aks", kubeconfig=kubeconfig, opts=ResourceOptions(depends_on=[aks]))
-
+ 
 # Namespace for Argo CD
 argocd_ns = k8s.core.v1.Namespace(
     "argocd-ns",
     metadata={"name": argocd_namespace},
     opts=ResourceOptions(provider=k8s_provider, depends_on=[aks]),
 )
-
+ 
 # Install Argo CD via Helm (server type: LoadBalancer)
 argocd_values = {
     "fullnameOverride": "argocd",      # <<< pin resource names to `argocd-*`
@@ -251,27 +247,29 @@ argocd_values = {
         "service": {"type": "LoadBalancer"},
     }
 }
-
+ 
 argocd_chart = k8s.helm.v3.Chart(
     "argocd",
     k8s.helm.v3.ChartOpts(
         chart="argo-cd",
-        version=argocd_chart_version,  # None == latest
+        version=argocd_chart_version,          # None == latest
         namespace=argocd_namespace,
         fetch_opts=k8s.helm.v3.FetchOpts(repo="https://argoproj.github.io/argo-helm"),
         values=argocd_values,
+        # 👇 force Helm to render against a modern API version during preview
+        kube_version=(k8s_version or "1.29.0"),
     ),
     opts=ResourceOptions(
         provider=k8s_provider,
-        depends_on=[argocd_ns],  # ensure namespace exists first
+        depends_on=[argocd_ns],
     ),
 )
 def _server_name_from_values(values: dict) -> str:
     fo = values.get("fullnameOverride")
     return f"{fo}-server" if fo else "argocd-argocd-server"
-
+ 
 server_svc_name = _server_name_from_values(argocd_values)
-
+ 
 if runtime.is_dry_run():
     # During preview, avoid trying to read the Service before Helm creates it
     argocd_host = pulumi.Output.secret("pending (preview)")
@@ -282,7 +280,7 @@ else:
         pulumi.Output.concat(argocd_namespace, "/", server_svc_name),
         opts=ResourceOptions(provider=k8s_provider, depends_on=[argocd_chart]),
     )
-
+ 
     argocd_lb_ing = argocd_svc.status.apply(
         lambda s: (getattr(s, "load_balancer", None) and
                    getattr(s.load_balancer, "ingress", None) and
@@ -290,12 +288,12 @@ else:
                    s.load_balancer.ingress[0]) or None
     )
     argocd_host = argocd_lb_ing.apply(lambda i: (getattr(i, "hostname", None) or getattr(i, "ip", None)))
-
+ 
 pulumi.export("argocdNamespace", argocd_namespace)
 pulumi.export("argocdServerExternal", argocd_host)
-
+ 
 # Surface the Argo CD Server LB endpoint (hostname or IP)
-
+ 
 # Optional: create an Argo CD Application to bootstrap workloads
 # if argo_repo_url and argo_repo_path:
 #     # Ensure CRDs from the chart are present before creating CRs
@@ -319,7 +317,7 @@ pulumi.export("argocdServerExternal", argocd_host)
 #             ],
 #         },
 #     }
-
+ 
 #     # Remove None-valued fields (CRD validation doesn’t like them)
 #     def _strip_nones(obj):
 #         if isinstance(obj, dict):
@@ -327,9 +325,9 @@ pulumi.export("argocdServerExternal", argocd_host)
 #         if isinstance(obj, list):
 #             return [_strip_nones(v) for v in obj if v is not None]
 #         return obj
-
+ 
 #     app_spec = _strip_nones(app_spec)
-
+ 
 #     argo_app = k8s.apiextensions.CustomResource(
 #         "argocd-bootstrap-app",
 #         api_version="argoproj.io/v1alpha1",
@@ -342,13 +340,13 @@ pulumi.export("argocdServerExternal", argocd_host)
 #         spec=app_spec,
 #         opts=ResourceOptions(provider=k8s_provider, depends_on=[argocd_chart]),
 #     )
-
+ 
 # Export the external endpoint
 pulumi.export("argocdNamespace", argocd_namespace)
 pulumi.export("argocdServerExternal", argocd_host)
-
-
-
+ 
+ 
+ 
 # -------- Optional: AKS RBAC Cluster Admin for you --------
 aks_cluster_admin = azclassic.authorization.Assignment(
     "aks-cluster-admin",
@@ -357,9 +355,8 @@ aks_cluster_admin = azclassic.authorization.Assignment(
     principal_id=client_cfg.object_id,
     opts=ResourceOptions(depends_on=[aks]),
 )
-
+ 
 # -------- Outputs --------
 pulumi.export("resourceGroupName", rg.name)
 pulumi.export("aksClusterName", aks.name)
 pulumi.export("kubeconfig", pulumi.Output.secret(kubeconfig))
-

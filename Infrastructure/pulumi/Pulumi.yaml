@@ -11,7 +11,7 @@ config:
   resourceGroupName:
     description: "Resource Group for control-plane resources."
   aksClusterName:
-    description: "AKS cluster name."
+    description: "az-pulumi-cluster."
   dnsPrefix:
     description: "DNS prefix for AKS API."
     default: "az-pulumi-cluster"
@@ -20,7 +20,7 @@ config:
     default: 1
   nodeVmSize:
     description: "VM size for nodes."
-    default: "Standard_DS2_v2"
+    default: "Standard_DS2_v3"
   nodeResourceGroup:
     description: "Node resource group name created/used by AKS."
     default: "mc-resource-group-pulumi"
@@ -51,7 +51,7 @@ config:
   argocdChartVersion:
     description: "argo/argo-cd chart version (leave blank for latest)."
     default: ""          # ← empty means use latest
-
+ 
   # These are only needed if you want auto-bootstrap.
   # With defaults, they become optional.
   argoRepoUrl:
@@ -78,5 +78,3 @@ config:
   argoCreateNamespace:
     description: "Let Argo create destination namespace."
     default: true
-
-
