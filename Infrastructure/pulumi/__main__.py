@@ -108,9 +108,10 @@ if k8s_version:
 aks = azure.containerservice.ManagedCluster(
     aks_name,
     **mc_args,
-    name=aks_name,
+
     opts=ResourceOptions(depends_on=[rg]),
 )
+
 # aks = azure.containerservice.ManagedCluster(
 #     aks_name,                    # 👈 this is the Azure AKS name (no suffix if you set it explicitly)
 #     resource_group_name=rg.name,
