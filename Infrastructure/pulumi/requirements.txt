@@ -1,0 +1,5 @@
+pulumi>=3.120.0
+pulumi-azure-native>=2.69.0
+pulumi-kubernetes>=4.8.0
+pulumi-azuread>=5.53.0
+pulumi-azure>=6.6.2

@@ -61,13 +61,13 @@ jobs:
       id: init
       run: |
         echo "$PWD"
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform init
 
     - name: Terraform Validate
       id: validate
       run: |
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform validate -no-color
 
     # - name: Terraform Plan
@@ -83,7 +83,7 @@ jobs:
 
     - name: Terraform Apply
       run: |
-        cd $PWD/Infrastructure
+        cd $PWD/Infrastructure/terraform
         terraform apply -auto-approve -input=false
     # - name: Terraform destroy
     #   run: |
