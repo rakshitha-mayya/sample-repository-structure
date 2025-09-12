@@ -29,13 +29,13 @@ jobs:
         with:
           pulumi-version: latest
 
-      # - name: Login to Pulumi
-      #   run: pulumi login
-      #   env:
-      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      - name: Login to Pulumi
+        run: pulumi login
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
 
-      # - name: Select stack
-      #   run: pulumi stack select dev --cwd Infrastructure/pulumi
+      - name: Select stack
+        run: pulumi stack select dev --cwd Infrastructure/pulumi
 
       # - name: Pulumi up
       #   run: pulumi up --yes --cwd Infrastructure/pulumi
