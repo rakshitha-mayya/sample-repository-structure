@@ -68,8 +68,8 @@ jobs:
       # - name: Pulumi up
       #   run: pulumi up --yes --cwd Infrastructure/pulumi
 
-      - name: Pulumi down
-        run: pulumi down --yes --cwd Infrastructure/pulumi
+      # - name: Pulumi down
+      #   run: pulumi down --yes --cwd Infrastructure/pulumi
 
       # - name: Pulumi up
       #   run: pulumi up --yes --cwd Infrastructure/pulumi

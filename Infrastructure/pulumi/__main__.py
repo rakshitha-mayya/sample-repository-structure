@@ -105,9 +105,26 @@ if k8s_version:
     mc_args["kubernetes_version"] = k8s_version
 
 # -------- AKS Cluster (CREATE THIS BEFORE referencing 'aks') --------
+# aks = azure.containerservice.ManagedCluster(
+#     aks_name,
+#     **mc_args,
+#     name=aks_name,
+#     opts=ResourceOptions(depends_on=[rg]),
+# )
 aks = azure.containerservice.ManagedCluster(
-    aks_name,
-    **mc_args,
+    "aks",  # Pulumi logical name (internal to Pulumi)
+    resource_group_name=rg.name,
+    resource_name=aks_name,           # 👈 sets the actual Azure AKS name exactly
+    location=rg.location,
+    dns_prefix=dns_prefix,
+    agent_pool_profiles=[agent_pool],
+    addon_profiles=addon_profiles,
+    aad_profile=aad_profile,
+    enable_rbac=True,
+    identity=identity,
+    node_resource_group=node_rg_name_cfg,
+    tags=common_tags,
+    **({"kubernetes_version": k8s_version} if k8s_version else {}),
     opts=ResourceOptions(depends_on=[rg]),
 )
 
