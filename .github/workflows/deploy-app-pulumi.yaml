@@ -1,0 +1,141 @@
+name: Deploy application
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - pe-pattern-2
+jobs:
+  Gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        continue-on-error: true
+
+  SonarQube-scan:
+    needs: Gitleaks
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed for PR comments
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Add SonarQube scan summary
+        run: |
+          echo "🔍 SonarQube Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo '<p align="center"><a href="https://sonarcloud.io/project/overview?id=rakshitha-mayya_sample-repository-structure">📊 View Full Report</a></p>' >> $GITHUB_STEP_SUMMARY
+    
+  Trivy-Scan:
+    needs: SonarQube-scan
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Trivy vulnerability scanner (Filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          output: 'trivy-results.txt'
+      
+      - name: Show Trivy results in summary
+        run: |
+          echo "## 🔍 Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat trivy-results.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+  Image-build-and-deploy:
+    needs: Trivy-Scan
+    environment: pe-pattern
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: true 
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: |
+          {
+            "clientId": "657f814b-9667-4e5a-a3d4-3f264ff38bb4",
+            "clientSecret": "7Rl8Q~EN-qc.DDOlXI6KrkJkpEhfGVa392YsGcwG",
+            "subscriptionId": "05276564-4a5f-40d6-b156-3ed5768e3bf3",
+            "tenantId": "8196ddea-f6c5-4044-8209-53ad1fdaebbf",
+            "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+            "resourceManagerEndpointUrl": "https://management.azure.com/",
+            "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+            "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+            "galleryEndpointUrl": "https://gallery.azure.com/",
+            "managementEndpointUrl": "https://management.core.windows.net/"
+          }
+            
+    - name: Docker login
+      run: az acr login --name acr
+
+    - name: Build Docker image
+      run: |
+        CURRENT_TAG=$(echo $(git rev-parse --short HEAD))
+        echo ${CURRENT_TAG}
+        cd $PWD/application/node-k8s-app
+        docker build -t acr.azurecr.io/nodejs-app:${CURRENT_TAG} .
+        docker push acr.azurecr.io/nodejs-app:${CURRENT_TAG}
+
+    # - name: Deploy ArgoCD Application
+    #   run: |
+    #     # cd helmcharts
+    #     az aks get-credentials --resource-group gitops-rg --name gitops-aks-cluster --overwrite-existing --admin
+    #     export IMAGE_TAG=$(echo $(git rev-parse --short HEAD))
+
+    #     # Generate new values file
+    #     envsubst < helmcharts/values1.yaml > helmcharts/values.generated.yaml
+
+    #     # Replace repoURL and apply ArgoCD application manifest
+    #     envsubst < helmcharts/application1.yaml | kubectl apply -n argocd -f -
+
+    - name: update tag
+      run: | 
+        CURRENT_TAG=$(git rev-parse --short HEAD)
+        echo "Current tag: ${CURRENT_TAG}"
+        
+        cd helmcharts
+        sed -i "s/tag: .*/tag: ${CURRENT_TAG}/" values.yaml
+
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        git add values.yaml
+        git commit -m "Update image tag to ${CURRENT_TAG}" || echo "No changes to commit"
+        git push 
+
+    - name: deploy
+      run: |
+        cd helmcharts
+        az aks get-credentials --resource-group pulumi-rg --name pulami-aks-dev --overwrite-existing --admin
+        kubectl apply -f application.yaml -n argocd
+        
+      
+# 
