@@ -59,7 +59,7 @@ jobs:
 
       - name: Select stack
         run: |
-          pulumi stack select --cwd Infrastructure/pulumi || pulumi stack init --cwd Infrastructure/pulumi
+          pulumi stack select dev --cwd Infrastructure/pulumi || pulumi stack init dev --cwd Infrastructure/pulumi
           pulumi stack change-secrets-provider default --cwd Infrastructure/pulumi
 
       - name: Pulumi preview
