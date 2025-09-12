@@ -47,8 +47,7 @@ common_tags.update(normalized_extra_tags)
  
 # -------- Resource Group --------
 rg = azure.resources.ResourceGroup(
-    "rg",                                 # Pulumi logical name
-    resource_name=resource_group_name,     # 👈 Azure resource group name (from config, exact)
+    resource_group_name,   # 👈 this is the actual Azure RG name
     location=location,
     tags=common_tags,
 )
